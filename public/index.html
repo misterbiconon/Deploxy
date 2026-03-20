@@ -3,111 +3,101 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DeployX Admin - Realtime</title>
+  <title>DeployX Admin - Live</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg: #06080f;
-      --surface: #0d1117;
-      --border: rgba(255,255,255,0.07);
-      --accent: #00e5ff;
-      --accent2: #bf5af2;
-      --text: #e8eaf2;
-      --muted: #5a6177;
-      --success: #00ffa3;
-      --danger: #ff4d6d;
-    }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 2rem 1rem;
-      overflow-x: hidden;
-    }
-
-    /* Fondo de Grid y Orbes */
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image: linear-gradient(rgba(0,229,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.02) 1px, transparent 1px);
-      background-size: 40px 40px;
-      z-index: 0;
-    }
-
-    .orb { position: fixed; border-radius: 50%; filter: blur(80px); z-index: 0; opacity: 0.4; }
+    :root { --bg: #06080f; --surface: #0d1117; --border: rgba(255,255,255,0.07); --accent: #00e5ff; --accent2: #bf5af2; --text: #e8eaf2; --muted: #5a6177; --success: #00ffa3; --danger: #ff4d6d; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem; overflow-x: hidden; }
+    body::before { content: ''; position: fixed; inset: 0; background-image: linear-gradient(rgba(0,229,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.02) 1px, transparent 1px); background-size: 40px 40px; z-index: 0; }
+    .orb { position: fixed; border-radius: 50%; filter: blur(80px); z-index: 0; opacity: 0.3; }
     .orb1 { width: 400px; height: 400px; background: var(--accent); top: -10%; left: -10%; animation: float 10s infinite alternate; }
     .orb2 { width: 300px; height: 300px; background: var(--accent2); bottom: -5%; right: -5%; animation: float 12s infinite alternate-reverse; }
-
     @keyframes float { to { transform: translate(40px, 40px); } }
-
     .page { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
-
-    /* Header y Live Pill */
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
     .brand h1 { font-family: 'Syne', sans-serif; font-size: 2rem; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    
-    .live-pill {
-      background: rgba(0,255,163,0.05);
-      border: 1px solid rgba(0,255,163,0.2);
-      padding: 0.5rem 1.2rem;
-      border-radius: 999px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
+    .live-pill { background: rgba(0,255,163,0.05); border: 1px solid rgba(0,255,163,0.2); padding: 0.5rem 1.2rem; border-radius: 999px; display: flex; align-items: center; gap: 10px; }
     .live-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 1.5s infinite; }
     @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,255,163,0.7); } 70% { box-shadow: 0 0 0 10px rgba(0,255,163,0); } 100% { box-shadow: 0 0 0 0 rgba(0,255,163,0); } }
-
     .live-num { font-family: 'Syne', sans-serif; font-weight: 800; color: var(--success); font-size: 1.2rem; }
     .live-num.bump { animation: bump 0.3s ease-out; }
     @keyframes bump { 50% { transform: scale(1.4); } }
-
-    /* Cards de Stats */
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
     .card { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; border-radius: 1rem; }
     .stat-label { font-size: 0.7rem; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; }
     .stat-value { font-family: 'Syne', sans-serif; font-size: 1.8rem; color: var(--accent); margin-top: 5px; }
-
-    /* Formulario de Subida */
     .upload-box { background: var(--surface); border: 1px solid var(--border); padding: 2rem; border-radius: 1.5rem; margin-bottom: 2.5rem; }
-    input[type="text"] { width: 100%; background: #06080f; border: 1px solid var(--border); padding: 0.8rem; border-radius: 0.5rem; color: white; margin-bottom: 1rem; }
-    .dropzone { border: 2px dashed var(--border); padding: 1.5rem; border-radius: 1rem; text-align: center; cursor: pointer; margin-bottom: 1rem; transition: 0.3s; }
-    .dropzone:hover { border-color: var(--accent); background: rgba(0,229,255,0.05); }
-
-    .btn-main {
-      width: 100%; padding: 1rem; border: none; border-radius: 0.8rem;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      color: #000; font-family: 'Syne', sans-serif; font-weight: 800; cursor: pointer;
-      transition: 0.3s;
-    }
-    .btn-main:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,229,255,0.2); }
-
-    /* Lista de Proyectos */
-    .project-item {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      padding: 1rem;
-      border-radius: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.8rem;
-    }
+    input[type="text"] { width: 100%; background: #06080f; border: 1px solid var(--border); padding: 0.8rem; border-radius: 0.5rem; color: white; margin-bottom: 1rem; outline: none; }
+    .dropzone { border: 2px dashed var(--border); padding: 1.5rem; border-radius: 1rem; text-align: center; cursor: pointer; margin-bottom: 1rem; }
+    .btn-main { width: 100%; padding: 1rem; border: none; border-radius: 0.8rem; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; font-family: 'Syne', sans-serif; font-weight: 800; cursor: pointer; }
+    .project-item { background: var(--surface); border: 1px solid var(--border); padding: 1rem; border-radius: 1rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
     .btn-view { color: var(--accent); text-decoration: none; font-weight: 600; margin-right: 15px; }
     .btn-del { background: rgba(255,77,109,0.1); color: var(--danger); border: none; padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; }
-
     #status { margin-top: 1rem; display: none; padding: 1rem; border-radius: 0.5rem; text-align: center; }
-    .success { background: rgba(0,255,163,0.1); color: var(--success); }
   </style>
 </head>
 <body>
-  <div class="orb orb1"></div>
+  <div class="orb orb1"></div><div class="orb orb2"></div>
+  <div class="page">
+    <div class="header">
+      <div class="brand"><h1>DeployX</h1></div>
+      <div class="live-pill">
+        <div class="live-dot"></div>
+        <div class="live-num" id="liveNum">1</div>
+        <div style="font-size: 0.6rem; line-height: 1;"><strong>LIVE</strong><br><span style="color:var(--muted)">USUARIOS</span></div>
+      </div>
+    </div>
+    <div class="stats-grid">
+      <div class="card"><div class="stat-label">Proyectos</div><div class="stat-value" id="countProjects">0</div></div>
+      <div class="card"><div class="stat-label">Servidor</div><div class="stat-value" style="color:var(--success)">ONLINE</div></div>
+    </div>
+    <div class="upload-box">
+      <input type="text" id="nameInput" placeholder="Nombre del proyecto">
+      <div class="dropzone" onclick="document.getElementById('fileInput').click()">
+        <input type="file" id="fileInput" accept=".zip" style="display:none">
+        <span id="fileLabel">📦 Toca para seleccionar .zip</span>
+      </div>
+      <button class="btn-main" onclick="deploy()">DESPLEGAR</button>
+      <div id="status"></div>
+    </div>
+    <div id="list"></div>
+    <p style="text-align:center; color:var(--muted); font-size:0.7rem; margin-top:2rem;">MORELOS CLOUD · 2026</p>
+  </div>
+  <script>
+    const liveNum = document.getElementById('liveNum');
+    async function sync() {
+      try {
+        const res = await fetch('/api/projects');
+        const data = await res.json();
+        if (liveNum.innerText !== String(data.online)) {
+          liveNum.classList.add('bump');
+          setTimeout(() => liveNum.classList.remove('bump'), 300);
+        }
+        liveNum.innerText = data.online;
+        document.getElementById('countProjects').innerText = data.projects.length;
+        document.getElementById('list').innerHTML = data.projects.map(p => `
+          <div class="project-item"><span>🌐 ${p}</span><div>
+            <a class="btn-view" href="/sites/${p}/index.html" target="_blank">VER</a>
+            <button class="btn-del" onclick="remove('${p}')">BORRAR</button>
+          </div></div>`).join('');
+      } catch (e) {}
+    }
+    async function deploy() {
+      const name = document.getElementById('nameInput').value;
+      const file = document.getElementById('fileInput').files[0];
+      if(!name || !file) return alert("Faltan datos");
+      const fd = new FormData(); fd.append('name', name); fd.append('zipfile', file);
+      try {
+        const res = await fetch('/deploy', { method: 'POST', body: fd });
+        if(res.ok) { sync(); document.getElementById('status').style.display = 'block'; document.getElementById('status').innerText = "✅ ¡Listo!"; }
+      } catch (e) { alert("Error"); }
+    }
+    async function remove(n) { if(confirm("¿Borrar?")) { await fetch('/api/projects/'+n, {method:'DELETE'}); sync(); } }
+    setInterval(sync, 3000); sync();
+  </script>
+</body>
+</html>
   <div class="orb orb2"></div>
 
   <div class="page">
