@@ -7,43 +7,60 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Configuración de rutas absolutas para evitar el "Not Found"
+// Configuración de rutas ABSOLUTAS (Vital para Render)
 const SITES_DIR = path.join(__dirname, 'sites');
 const PUBLIC_DIR = path.join(__dirname, 'public');
 
-// Crear carpetas necesarias si no existen
-if (!fs.existsSync(SITES_DIR)) fs.mkdirSync(SITES_DIR, { recursive: true });
+// Crear la carpeta de sitios si no existe con permisos de escritura
+if (!fs.existsSync(SITES_DIR)) {
+    fs.mkdirSync(SITES_DIR, { recursive: true });
+    console.log("✅ Carpeta /sites creada correctamente");
+}
 
 const upload = multer({ dest: 'uploads/' });
 
-// Servir archivos estáticos con rutas absolutas
-app.use(express.static(PUBLIC_DIR));
+// IMPORTANTE: El orden de estas líneas importa
 app.use('/sites', express.static(SITES_DIR));
+app.use(express.static(PUBLIC_DIR));
 
 app.post('/deploy', upload.single('zipfile'), async (req, res) => {
-  const projectName = req.body.name?.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
-  
-  if (!projectName || !req.file) {
-    return res.status(400).json({ error: 'Nombre y archivo requeridos' });
-  }
-
-  const projectDir = path.join(SITES_DIR, projectName);
-  if (!fs.existsSync(projectDir)) fs.mkdirSync(projectDir, { recursive: true });
-
-  try {
-    // Descomprimir el archivo .zip
-    await fs.createReadStream(req.file.path)
-      .pipe(unzipper.Extract({ path: projectDir }))
-      .promise();
-
-    // Borrar el archivo temporal subido
-    fs.unlinkSync(req.file.path);
+    const projectName = req.body.name?.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
     
-    // Devolvemos la URL completa para que el botón de la web funcione
-    res.json({ url: `/sites/${projectName}/index.html` });
-  } catch (err) {
-    res.status(500).json({ error: 'Error al descomprimir: ' + err.message });
-  }
+    if (!projectName || !req.file) {
+        return res.status(400).json({ error: 'Nombre y archivo requeridos' });
+    }
+
+    const projectDir = path.join(SITES_DIR, projectName);
+
+    try {
+        // Creamos la carpeta del proyecto específico
+        if (!fs.existsSync(projectDir)) {
+            fs.mkdirSync(projectDir, { recursive: true });
+        }
+
+        // Descomprimimos el ZIP
+        await fs.createReadStream(req.file.path)
+            .pipe(unzipper.Extract({ path: projectDir }))
+            .promise();
+
+        // Borramos el archivo temporal
+        fs.unlinkSync(req.file.path);
+        
+        // Enviamos la URL relativa para que el navegador la encuentre
+        const finalUrl = `/sites/${projectName}/index.html`;
+        console.log(`🚀 Proyecto desplegado en: ${finalUrl}`);
+        res.json({ url: finalUrl });
+
+    } catch (err) {
+        console.error("❌ Error en el despliegue:", err);
+        res.status(500).json({ error: 'Error al procesar: ' + err.message });
+    }
 });
 
-app.listen(PORT, () => console.log(`🚀 DeployX encendido en puerto ${PORT}`));
+// Ruta de respaldo para ver si el servidor responde
+app.get('/status', (req, res) => res.send('Servidor DeployX Activo 🚀'));
+
+app.listen(PORT, () => {
+    console.log(`Log: Servidor corriendo en puerto ${PORT}`);
+    console.log(`Log: Ruta de sitios: ${SITES_DIR}`);
+});
