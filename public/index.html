@@ -3,101 +3,158 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DeployX - Control Real</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  <title>DeployX Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root { --bg: #06080f; --surface: #0d1117; --border: rgba(255,255,255,0.07); --accent: #00e5ff; --accent2: #bf5af2; --text: #e8eaf2; --muted: #5a6177; --success: #00ffa3; --danger: #ff4d6d; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem; overflow-x: hidden; }
-    .page { position: relative; z-index: 1; max-width: 800px; margin: 0 auto; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-    .brand h1 { font-family: 'Syne', sans-serif; font-size: 2rem; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-    .live-pill { background: rgba(0,255,163,0.05); border: 1px solid rgba(0,255,163,0.2); padding: 0.5rem 1.2rem; border-radius: 999px; display: flex; align-items: center; gap: 10px; }
-    .live-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,255,163,0.7); } 70% { box-shadow: 0 0 0 10px rgba(0,255,163,0); } 100% { box-shadow: 0 0 0 0 rgba(0,255,163,0); } }
-    .live-num { font-family: 'Syne', sans-serif; font-weight: 800; color: var(--success); font-size: 1.2rem; }
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
-    .card { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; border-radius: 1rem; }
-    .stat-label { font-size: 0.7rem; text-transform: uppercase; color: var(--muted); letter-spacing: 1px; }
-    .stat-value { font-family: 'Syne', sans-serif; font-size: 1.8rem; color: var(--accent); margin-top: 5px; }
-    .upload-box { background: var(--surface); border: 1px solid var(--border); padding: 2rem; border-radius: 1.5rem; margin-bottom: 2.5rem; }
-    input[type="text"] { width: 100%; background: #06080f; border: 1px solid var(--border); padding: 0.8rem; border-radius: 0.5rem; color: white; margin-bottom: 1rem; outline: none; }
-    .btn-main { width: 100%; padding: 1rem; border: none; border-radius: 0.8rem; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; font-family: 'Syne', sans-serif; font-weight: 800; cursor: pointer; }
-    .project-item { background: var(--surface); border: 1px solid var(--border); padding: 1rem; border-radius: 1rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
-    .btn-del { background: rgba(255,77,109,0.1); color: var(--danger); border: none; padding: 0.4rem 0.8rem; border-radius: 0.4rem; cursor: pointer; }
-    #status { margin-top: 1rem; display: none; padding: 1rem; border-radius: 0.5rem; text-align: center; }
+    :root {
+      --bg: #06080f; --surface: #0d1117; --border: rgba(255,255,255,0.07);
+      --accent: #00e5ff; --accent2: #bf5af2; --text: #e8eaf2; --muted: #5a6177;
+      --success: #00ffa3; --danger: #ff4d6d; --warn: #ffb800;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem 4rem; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+      background-size: 40px 40px; z-index: 0; pointer-events: none;
+    }
+    .orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; opacity: 0.5; filter: blur(80px); }
+    .orb1 { width:400px; height:400px; background: var(--accent); top:-100px; left:-100px; opacity: 0.1; }
+    .orb2 { width:300px; height:300px; background: var(--accent2); bottom:-50px; right:-50px; opacity: 0.1; }
+    .page { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; }
+    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:2.5rem; flex-wrap:wrap; gap:1rem; }
+    .brand h1 {
+      font-family: 'Syne', sans-serif; font-size:1.8rem; font-weight:800;
+      background: linear-gradient(135deg, #fff 0%, var(--accent) 60%, var(--accent2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .live-pill { display:flex; align-items:center; gap:0.55rem; background:rgba(0,255,163,0.06); border:1px solid rgba(0,255,163,0.2); border-radius:999px; padding:0.45rem 1.1rem; }
+    .live-dot { width:8px; height:8px; border-radius:50%; background:var(--success); animation:livePulse 1.8s ease-out infinite; }
+    @keyframes livePulse { 0%{box-shadow:0 0 0 0 rgba(0,255,163,0.5);} 70%{box-shadow:0 0 0 8px rgba(0,255,163,0);} 100%{box-shadow:0 0 0 0 rgba(0,255,163,0);} }
+    .live-num { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; color:var(--success); }
+    .live-num.bump { animation: bump 0.3s ease-out; }
+    @keyframes bump { 50% { transform:scale(1.5); } }
+    .stats-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:2rem; }
+    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:1rem; padding:1.25rem 1.5rem; }
+    .stat-label { font-size:0.72rem; color:var(--muted); text-transform:uppercase; margin-bottom:0.4rem; }
+    .stat-value { font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; color:var(--accent); }
+    .upload-panel { background:var(--surface); border:1px solid var(--border); border-radius:1.25rem; padding:1.75rem; margin-bottom:2rem; }
+    .upload-grid { display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom: 1rem; }
+    @media(max-width:600px){ .upload-grid { grid-template-columns: 1fr; } }
+    input[type="text"] { width:100%; padding:0.8rem; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:0.6rem; color:white; outline:none; }
+    .dropzone { border:2px dashed var(--border); padding:1rem; border-radius:0.6rem; text-align:center; cursor:pointer; color:var(--muted); position: relative; }
+    .upload-btn { width:100%; padding:1rem; border:none; border-radius:0.65rem; background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#000; font-family:'Syne',sans-serif; font-weight:800; cursor:pointer; }
+    .project-card { background:var(--surface); border:1px solid var(--border); padding:1rem; border-radius:1rem; display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem; }
+    .btn-view { color:var(--accent); text-decoration:none; font-weight:600; font-size:0.8rem; margin-right:1rem;}
+    .btn-del { color:var(--danger); background:none; border:none; cursor:pointer; font-weight:600; font-size:0.8rem;}
+    #uploadStatus { margin-top:1rem; padding:0.8rem; border-radius:0.5rem; display:none; text-align:center; font-size:0.9rem; }
   </style>
 </head>
 <body>
+  <div class="orb orb1"></div><div class="orb orb2"></div>
   <div class="page">
     <div class="header">
-      <div class="brand"><h1>DeployX</h1></div>
+      <div class="brand"><h1>DeployX</h1><span style="color:var(--muted); font-size:0.7rem;">ADMIN</span></div>
       <div class="live-pill">
         <div class="live-dot"></div>
         <div class="live-num" id="liveNum">1</div>
-        <div style="font-size: 0.6rem; line-height: 1;"><strong>LIVE</strong><br><span style="color:var(--muted)">USUARIOS</span></div>
+        <div style="font-size:0.7rem; line-height:1; margin-left:5px;"><strong>LIVE</strong><br><span style="color:var(--muted)">USUARIOS</span></div>
       </div>
     </div>
 
-    <div class="stats-grid">
-      <div class="card"><div class="stat-label">Proyectos Activos</div><div class="stat-value" id="countProjects">0</div></div>
-      <div class="card"><div class="stat-label">Estado</div><div class="stat-value" style="color:var(--success)">ONLINE</div></div>
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Proyectos</div><div class="stat-value" id="statProjects">0</div></div>
+      <div class="stat-card"><div class="stat-label">Servidor</div><div class="stat-value" style="color:var(--success)">ONLINE</div></div>
     </div>
 
-    <div class="upload-box">
-      <input type="text" id="nameInput" placeholder="Nombre del proyecto...">
-      <input type="file" id="fileInput" accept=".zip" style="margin-bottom:1rem; display:block; width:100%;">
-      <button class="btn-main" onclick="deploy()">DESPLEGAR</button>
-      <div id="status"></div>
+    <div class="upload-panel">
+      <div class="upload-grid">
+        <div class="field">
+          <input type="text" id="projName" placeholder="Nombre del proyecto..."/>
+        </div>
+        <div class="field">
+          <div class="dropzone" onclick="document.getElementById('zipFile').click()">
+            <input type="file" id="zipFile" accept=".zip" style="display:none"/>
+            <span id="fileName">📦 Seleccionar .zip</span>
+          </div>
+        </div>
+      </div>
+      <button class="upload-btn" onclick="upload()">🚀 PUBLICAR AHORA</button>
+      <div id="uploadStatus"></div>
     </div>
 
-    <div id="list"></div>
-    <p style="text-align:center; color:var(--muted); font-size:0.7rem; margin-top:3rem;">MORELOS CLOUD · 2026</p>
+    <div id="projectList"></div>
+    <p style="text-align:center; color:#1e2535; font-size:0.7rem; margin-top:3rem;">MORELOS CLOUD · 2026</p>
   </div>
 
   <script>
-    const liveNum = document.getElementById('liveNum');
+    const liveNumEl = document.getElementById('liveNum');
+    const zipInput = document.getElementById('zipFile');
+    const fileNameEl = document.getElementById('fileName');
 
-    // ESTA FUNCIÓN ES LA QUE MANDA: Solo lee lo que dice el servidor
-    async function sync() {
+    zipInput.onchange = () => { if(zipInput.files[0]) fileNameEl.innerText = "✅ " + zipInput.files[0].name; };
+
+    async function syncRadar() {
       try {
         const res = await fetch('/api/projects');
         const data = await res.json();
-        
-        // El número NO se mueve a menos que el servidor lo diga
-        liveNum.innerText = data.online;
-        document.getElementById('countProjects').innerText = data.projects.length;
-        
-        document.getElementById('list').innerHTML = data.projects.map(p => `
-          <div class="project-item">
+
+        // REGLA DE ORO: Solo lo que diga el servidor
+        if (liveNumEl.innerText !== String(data.online)) {
+          liveNumEl.innerText = data.online;
+          liveNumEl.classList.add('bump');
+          setTimeout(() => liveNumEl.classList.remove('bump'), 300);
+        }
+        document.getElementById('statProjects').innerText = data.projects.length;
+
+        const list = document.getElementById('projectList');
+        list.innerHTML = data.projects.map(p => `
+          <div class="project-card">
             <span>🌐 ${p}</span>
-            <button class="btn-del" onclick="remove('${p}')">Borrar</button>
-          </div>
-        `).join('');
-      } catch (e) { console.error("Error de conexión real"); }
+            <div>
+              <a class="btn-view" href="/sites/${p}/index.html" target="_blank">VER</a>
+              <button class="btn-del" onclick="deleteProj('${p}')">BORRAR</button>
+            </div>
+          </div>`).join('');
+      } catch (err) { console.error("Error de conexión real"); }
     }
 
-    async function deploy() {
-      const name = document.getElementById('nameInput').value;
-      const file = document.getElementById('fileInput').files[0];
-      if(!name || !file) return alert("Faltan datos");
-      const fd = new FormData(); fd.append('name', name); fd.append('zipfile', file);
+    async function upload() {
+      const name = document.getElementById('projName').value.trim();
+      const file = zipInput.files[0];
+      const statusEl = document.getElementById('uploadStatus');
+      if (!name || !file) return alert("Faltan datos");
+
+      statusEl.style.display = 'block';
+      statusEl.innerText = "⏳ Subiendo...";
+      statusEl.style.color = "var(--accent)";
+
+      const fd = new FormData();
+      fd.append('name', name);
+      fd.append('zipfile', file);
+
       try {
         const res = await fetch('/deploy', { method: 'POST', body: fd });
-        if(res.ok) { sync(); alert("¡Subido!"); }
-      } catch (e) { alert("Error"); }
+        if (res.ok) {
+          statusEl.innerText = "✨ ¡Publicado con éxito!";
+          statusEl.style.color = "var(--success)";
+          syncRadar();
+        } else {
+          statusEl.innerText = "❌ Error al subir";
+          statusEl.style.color = "var(--danger)";
+        }
+      } catch (e) { alert("Error de conexión"); }
     }
 
-    async function remove(n) {
-      if(confirm("¿Borrar?")) {
-        await fetch('/api/projects/'+n, {method:'DELETE'});
-        sync();
+    async function deleteProj(name) {
+      if (confirm(`¿Borrar "${name}"?`)) {
+        await fetch(`/api/projects/${name}`, { method: 'DELETE' });
+        syncRadar();
       }
     }
 
-    // Sincronizar cada 3 segundos exactos
-    setInterval(sync, 3000);
-    sync();
+    setInterval(syncRadar, 3000);
+    syncRadar();
   </script>
 </body>
 </html>
