@@ -1,113 +1,79 @@
 <!DOCTYPE html>
-<html lang="es">
+<html>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DeployX — Deploy en segundos</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    <title>DeployX Admin - Morelos</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { background: #0f172a; color: white; font-family: sans-serif; text-align: center; }
+        .container { max-width: 600px; margin: auto; padding: 20px; }
+        .stats { background: #1e293b; padding: 10px; border-radius: 10px; margin-bottom: 20px; color: #38bdf8; }
+        .project-card { 
+            background: #1e293b; padding: 15px; margin: 10px 0; 
+            border-radius: 10px; display: flex; justify-content: space-between; align-items: center;
+            border-left: 5px solid #38bdf8;
+        }
+        button { cursor: pointer; padding: 8px 12px; border: none; border-radius: 5px; font-weight: bold; }
+        .btn-view { background: #38bdf8; color: #0f172a; margin-right: 5px; text-decoration: none; padding: 8px; font-size: 13px; border-radius: 5px; }
+        .btn-del { background: #ef4444; color: white; }
+        input, .upload-section { background: #1e293b; color: white; border: 1px solid #38bdf8; padding: 10px; width: 80%; margin: 10px; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 DeployX Admin</h1>
+        <div class="stats" id="stats">Cargando radar...</div>
 
-    :root {
-      --bg: #06080f;
-      --surface: #0d1117;
-      --border: rgba(255,255,255,0.07);
-      --accent: #00e5ff;
-      --accent2: #bf5af2;
-      --text: #e8eaf2;
-      --muted: #5a6177;
-      --success: #00ffa3;
-      --danger: #ff4d6d;
-    }
+        <div class="upload-section">
+            <h3>Subir Nuevo Proyecto</h3>
+            <input type="text" id="projName" placeholder="Nombre del proyecto"><br>
+            <input type="file" id="zipFile"><br><br>
+            <button class="btn-view" onclick="upload()">Publicar Ahora</button>
+        </div>
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem 1rem;
-      overflow-x: hidden;
-    }
+        <h3>Mis Proyectos en Vivo</h3>
+        <div id="projectList"></div>
+    </div>
 
-    body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
-      background-size: 40px 40px;
-      animation: gridMove 20s linear infinite;
-      z-index: 0;
-    }
+    <script>
+        async function loadProjects() {
+            const res = await fetch('/api/projects');
+            const data = await res.json();
+            document.getElementById('stats').innerText = `Conectados: ${data.online} | Proyectos: ${data.projects.length}`;
+            
+            const list = document.getElementById('projectList');
+            list.innerHTML = '';
+            data.projects.forEach(p => {
+                list.innerHTML += `
+                    <div class="project-card">
+                        <span>${p}</span>
+                        <div>
+                            <a class="btn-view" href="/sites/${p}/index.html" target="_blank">Ver Web</a>
+                            <button class="btn-del" onclick="deleteProj('${p}')">Borrar</button>
+                        </div>
+                    </div>`;
+            });
+        }
 
-    body::after {
-      content: '';
-      position: fixed;
-      width: 600px;
-      height: 600px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(0,229,255,0.07) 0%, transparent 70%);
-      top: -150px;
-      left: -150px;
-      animation: orbFloat 8s ease-in-out infinite alternate;
-      z-index: 0;
-      pointer-events: none;
-    }
+        async function upload() {
+            const formData = new FormData();
+            formData.append('name', document.getElementById('projName').value);
+            formData.append('zipfile', document.getElementById('zipFile').files[0]);
+            await fetch('/deploy', { method: 'POST', body: formData });
+            location.reload();
+        }
 
-    @keyframes gridMove {
-      0% { transform: translateY(0); }
-      100% { transform: translateY(40px); }
-    }
+        async function deleteProj(name) {
+            if(confirm(`¿Borrar ${name} para siempre?`)) {
+                await fetch(`/api/projects/${name}`, { method: 'DELETE' });
+                loadProjects();
+            }
+        }
 
-    @keyframes orbFloat {
-      from { transform: translate(0, 0); }
-      to { transform: translate(80px, 60px); }
-    }
-
-    .orb2 {
-      position: fixed;
-      width: 400px;
-      height: 400px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(191,90,242,0.08) 0%, transparent 70%);
-      bottom: -100px;
-      right: -100px;
-      animation: orbFloat2 10s ease-in-out infinite alternate;
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    @keyframes orbFloat2 {
-      from { transform: translate(0, 0); }
-      to { transform: translate(-60px, -40px); }
-    }
-
-    .wrapper {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 480px;
-      animation: fadeUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
-    }
-
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .header { text-align: center; margin-bottom: 2.5rem; }
-
-    .logo-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(0,229,255,0.07);
-      border: 1px solid rgba(0,229,255,0.2);
+        setInterval(loadProjects, 3000); // Actualiza cada 3 segundos
+        loadProjects();
+    </script>
+</body>
+</html>
       border-radius: 999px;
       padding: 0.35rem 1rem;
       font-size: 0.75rem;
