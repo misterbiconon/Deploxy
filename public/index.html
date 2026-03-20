@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DeployX - Real Data Only</title>
+  <title>DeployX - Control Real</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -13,7 +13,8 @@
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
     .brand h1 { font-family: 'Syne', sans-serif; font-size: 2rem; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     .live-pill { background: rgba(0,255,163,0.05); border: 1px solid rgba(0,255,163,0.2); padding: 0.5rem 1.2rem; border-radius: 999px; display: flex; align-items: center; gap: 10px; }
-    .live-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; }
+    .live-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(0,255,163,0.7); } 70% { box-shadow: 0 0 0 10px rgba(0,255,163,0); } 100% { box-shadow: 0 0 0 0 rgba(0,255,163,0); } }
     .live-num { font-family: 'Syne', sans-serif; font-weight: 800; color: var(--success); font-size: 1.2rem; }
     .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
     .card { background: var(--surface); border: 1px solid var(--border); padding: 1.5rem; border-radius: 1rem; }
@@ -23,6 +24,7 @@
     input[type="text"] { width: 100%; background: #06080f; border: 1px solid var(--border); padding: 0.8rem; border-radius: 0.5rem; color: white; margin-bottom: 1rem; outline: none; }
     .btn-main { width: 100%; padding: 1rem; border: none; border-radius: 0.8rem; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; font-family: 'Syne', sans-serif; font-weight: 800; cursor: pointer; }
     .project-item { background: var(--surface); border: 1px solid var(--border); padding: 1rem; border-radius: 1rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+    .btn-del { background: rgba(255,77,109,0.1); color: var(--danger); border: none; padding: 0.4rem 0.8rem; border-radius: 0.4rem; cursor: pointer; }
     #status { margin-top: 1rem; display: none; padding: 1rem; border-radius: 0.5rem; text-align: center; }
   </style>
 </head>
@@ -36,42 +38,53 @@
         <div style="font-size: 0.6rem; line-height: 1;"><strong>LIVE</strong><br><span style="color:var(--muted)">USUARIOS</span></div>
       </div>
     </div>
+
     <div class="stats-grid">
-      <div class="card"><div class="stat-label">Proyectos</div><div class="stat-value" id="countProjects">0</div></div>
+      <div class="card"><div class="stat-label">Proyectos Activos</div><div class="stat-value" id="countProjects">0</div></div>
+      <div class="card"><div class="stat-label">Estado</div><div class="stat-value" style="color:var(--success)">ONLINE</div></div>
     </div>
+
     <div class="upload-box">
-      <input type="text" id="nameInput" placeholder="Nombre del proyecto">
-      <button class="btn-main" onclick="deploy()">PUBLICAR</button>
+      <input type="text" id="nameInput" placeholder="Nombre del proyecto...">
+      <input type="file" id="fileInput" accept=".zip" style="margin-bottom:1rem; display:block; width:100%;">
+      <button class="btn-main" onclick="deploy()">DESPLEGAR</button>
       <div id="status"></div>
     </div>
+
     <div id="list"></div>
+    <p style="text-align:center; color:var(--muted); font-size:0.7rem; margin-top:3rem;">MORELOS CLOUD · 2026</p>
   </div>
 
   <script>
-    // --- AQUÍ ESTÁ LA VERDAD ---
+    const liveNum = document.getElementById('liveNum');
+
+    // ESTA FUNCIÓN ES LA QUE MANDA: Solo lee lo que dice el servidor
     async function sync() {
       try {
-        const response = await fetch('/api/projects');
-        const data = await response.json();
+        const res = await fetch('/api/projects');
+        const data = await res.json();
         
-        // SOLO usamos el número que viene del servidor
-        document.getElementById('liveNum').innerText = data.online;
+        // El número NO se mueve a menos que el servidor lo diga
+        liveNum.innerText = data.online;
         document.getElementById('countProjects').innerText = data.projects.length;
         
         document.getElementById('list').innerHTML = data.projects.map(p => `
-          <div class="project-item"><span>🌐 ${p}</span></div>`).join('');
-      } catch (e) { console.error("Error conectando al servidor real"); }
+          <div class="project-item">
+            <span>🌐 ${p}</span>
+            <button class="btn-del" onclick="remove('${p}')">Borrar</button>
+          </div>
+        `).join('');
+      } catch (e) { console.error("Error de conexión real"); }
     }
 
-    // Actualiza cada 3 segundos, sin inventar nada
-    setInterval(sync, 3000);
-    sync();
-
-    async function deploy() { /* Lógica de subida simplificada */ }
-  </script>
-</body>
-</html>
-        if(res.ok) { sync(); status.innerText = "✨ ¡Listo!"; }
+    async function deploy() {
+      const name = document.getElementById('nameInput').value;
+      const file = document.getElementById('fileInput').files[0];
+      if(!name || !file) return alert("Faltan datos");
+      const fd = new FormData(); fd.append('name', name); fd.append('zipfile', file);
+      try {
+        const res = await fetch('/deploy', { method: 'POST', body: fd });
+        if(res.ok) { sync(); alert("¡Subido!"); }
       } catch (e) { alert("Error"); }
     }
 
@@ -82,99 +95,7 @@
       }
     }
 
-    setInterval(sync, 3000);
-    sync();
-  </script>
-</body>
-</html>
-    </div>
-
-    <div class="stats-grid">
-      <div class="card"><div class="stat-label">Proyectos Activos</div><div class="stat-value" id="countProjects">0</div></div>
-      <div class="card"><div class="stat-label">Servidor</div><div class="stat-value" style="color:var(--success)">ONLINE</div></div>
-    </div>
-
-    <div class="upload-box">
-      <h3 style="margin-bottom:1rem; font-family:Syne;">🚀 Publicar Web</h3>
-      <input type="text" id="nameInput" placeholder="Nombre de tu proyecto...">
-      <div class="dropzone" onclick="document.getElementById('fileInput').click()">
-        <input type="file" id="fileInput" accept=".zip" style="display:none">
-        <span id="fileLabel">📦 Toca para seleccionar tu archivo .zip</span>
-      </div>
-      <button class="btn-main" onclick="deploy()">DESPLEGAR AHORA</button>
-      <div id="status"></div>
-    </div>
-
-    <h2 style="font-family:Syne; margin-bottom:1.5rem;">Gestión de Sitios</h2>
-    <div id="list"></div>
-
-    <p style="text-align:center; color:var(--muted); font-size:0.7rem; margin-top:3rem;">MORELOS CLOUD · 2026</p>
-  </div>
-
-  <script>
-    const liveNum = document.getElementById('liveNum');
-    const nameInput = document.getElementById('nameInput');
-    const fileInput = document.getElementById('fileInput');
-    const fileLabel = document.getElementById('fileLabel');
-
-    fileInput.onchange = () => { if(fileInput.files[0]) fileLabel.innerText = "✅ " + fileInput.files[0].name; };
-
-    // --- FUNCIÓN DEL RADAR REAL ---
-    async function sync() {
-      try {
-        const res = await fetch('/api/projects');
-        const data = await res.json();
-        
-        // Animación si el número cambia
-        if (liveNum.innerText !== String(data.online)) {
-          liveNum.classList.add('bump');
-          setTimeout(() => liveNum.classList.remove('bump'), 300);
-        }
-
-        liveNum.innerText = data.online;
-        document.getElementById('countProjects').innerText = data.projects.length;
-        
-        document.getElementById('list').innerHTML = data.projects.map(p => `
-          <div class="project-item">
-            <span style="font-weight:500">🌐 ${p}</span>
-            <div>
-              <a class="btn-view" href="/sites/${p}/index.html" target="_blank">VER</a>
-              <button class="btn-del" onclick="remove('${p}')">BORRAR</button>
-            </div>
-          </div>
-        `).join('');
-      } catch (e) { console.log("Error de sync"); }
-    }
-
-    async function deploy() {
-      const status = document.getElementById('status');
-      if(!nameInput.value || !fileInput.files[0]) return alert("Faltan datos");
-
-      const fd = new FormData();
-      fd.append('name', nameInput.value);
-      fd.append('zipfile', fileInput.files[0]);
-
-      status.style.display = 'block';
-      status.innerText = "⏳ Procesando en la nube...";
-
-      try {
-        const res = await fetch('/deploy', { method: 'POST', body: fd });
-        if(res.ok) {
-          status.className = "success";
-          status.innerText = "✨ ¡Web publicada correctamente!";
-          sync();
-        }
-      } catch (e) { alert("Error al subir"); }
-    }
-
-    async function remove(name) {
-      if(confirm("¿Seguro que quieres borrar " + name + "?")) {
-        await fetch('/api/projects/' + name, { method: 'DELETE' });
-        sync();
-      }
-    }
-
-    // Sincronizar cada 3 segundos
+    // Sincronizar cada 3 segundos exactos
     setInterval(sync, 3000);
     sync();
   </script>
