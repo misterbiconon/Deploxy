@@ -3,110 +3,105 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DeployX Admin</title>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <title>DeployX - Proyectos</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --bg: #06080f; --surface: #0d1117; --border: rgba(255,255,255,0.07);
       --accent: #00e5ff; --accent2: #bf5af2; --text: #e8eaf2; --muted: #5a6177;
-      --success: #00ffa3; --danger: #ff4d6d; --warn: #ffb800;
+      --success: #00ffa3; --danger: #ff4d6d;
     }
-    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem 4rem; }
-    body::before {
-      content: ''; position: fixed; inset: 0;
-      background-image: linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
-      background-size: 40px 40px; z-index: 0; pointer-events: none;
-    }
-    .orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; opacity: 0.5; filter: blur(80px); }
-    .orb1 { width:400px; height:400px; background: var(--accent); top:-100px; left:-100px; opacity: 0.1; }
-    .orb2 { width:300px; height:300px; background: var(--accent2); bottom:-50px; right:-50px; opacity: 0.1; }
-    .page { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; }
-    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:2.5rem; flex-wrap:wrap; gap:1rem; }
-    .brand h1 {
-      font-family: 'Syne', sans-serif; font-size:1.8rem; font-weight:800;
-      background: linear-gradient(135deg, #fff 0%, var(--accent) 60%, var(--accent2) 100%);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .live-pill { display:flex; align-items:center; gap:0.55rem; background:rgba(0,255,163,0.06); border:1px solid rgba(0,255,163,0.2); border-radius:999px; padding:0.45rem 1.1rem; }
-    .live-dot { width:8px; height:8px; border-radius:50%; background:var(--success); animation:livePulse 1.8s ease-out infinite; }
-    @keyframes livePulse { 0%{box-shadow:0 0 0 0 rgba(0,255,163,0.5);} 70%{box-shadow:0 0 0 8px rgba(0,255,163,0);} 100%{box-shadow:0 0 0 0 rgba(0,255,163,0);} }
-    .live-num { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:700; color:var(--success); }
-    .live-num.bump { animation: bump 0.3s ease-out; }
-    @keyframes bump { 50% { transform:scale(1.5); } }
-    .stats-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:2rem; }
-    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:1rem; padding:1.25rem 1.5rem; }
-    .stat-label { font-size:0.72rem; color:var(--muted); text-transform:uppercase; margin-bottom:0.4rem; }
-    .stat-value { font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; color:var(--accent); }
-    .upload-panel { background:var(--surface); border:1px solid var(--border); border-radius:1.25rem; padding:1.75rem; margin-bottom:2rem; }
-    .upload-grid { display:grid; grid-template-columns: 1fr 1fr; gap:1rem; margin-bottom: 1rem; }
-    @media(max-width:600px){ .upload-grid { grid-template-columns: 1fr; } }
-    input[type="text"] { width:100%; padding:0.8rem; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:0.6rem; color:white; outline:none; }
-    .dropzone { border:2px dashed var(--border); padding:1rem; border-radius:0.6rem; text-align:center; cursor:pointer; color:var(--muted); position: relative; }
-    .upload-btn { width:100%; padding:1rem; border:none; border-radius:0.65rem; background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#000; font-family:'Syne',sans-serif; font-weight:800; cursor:pointer; }
-    .project-card { background:var(--surface); border:1px solid var(--border); padding:1rem; border-radius:1rem; display:flex; justify-content:space-between; align-items:center; margin-bottom:0.8rem; }
-    .btn-view { color:var(--accent); text-decoration:none; font-weight:600; font-size:0.8rem; margin-right:1rem;}
-    .btn-del { color:var(--danger); background:none; border:none; cursor:pointer; font-weight:600; font-size:0.8rem;}
-    #uploadStatus { margin-top:1rem; padding:0.8rem; border-radius:0.5rem; display:none; text-align:center; font-size:0.9rem; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); padding: 2rem 1rem; }
+    .page { max-width: 800px; margin: 0 auto; position: relative; z-index: 1; }
+    .header { margin-bottom: 2.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem; }
+    .brand h1 { font-family: 'Syne', sans-serif; font-size: 2rem; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    
+    .stats-card { background: var(--surface); border: 1px solid var(--border); border-radius: 1rem; padding: 1.5rem; margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .stat-val { font-family: 'Syne', sans-serif; font-size: 2.5rem; color: var(--accent); }
+    .stat-lab { color: var(--muted); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; }
+
+    .upload-box { background: var(--surface); border: 1px solid var(--border); padding: 2rem; border-radius: 1.5rem; margin-bottom: 2rem; }
+    input[type="text"] { width: 100%; padding: 0.8rem; background: #06080f; border: 1px solid var(--border); border-radius: 0.6rem; color: white; margin-bottom: 1rem; outline: none; }
+    .btn-main { width: 100%; padding: 1rem; border: none; border-radius: 0.8rem; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #000; font-family: 'Syne', sans-serif; font-weight: 800; cursor: pointer; }
+    
+    .project-card { background: var(--surface); border: 1px solid var(--border); padding: 1rem; border-radius: 1rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; transition: transform 0.2s; }
+    .project-card:hover { transform: translateX(5px); border-color: var(--accent); }
+    .btn-view { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.8rem; }
+    .btn-del { color: var(--danger); background: none; border: none; cursor: pointer; font-size: 0.8rem; margin-left: 15px; }
   </style>
 </head>
 <body>
-  <div class="orb orb1"></div><div class="orb orb2"></div>
   <div class="page">
     <div class="header">
-      <div class="brand"><h1>DeployX</h1><span style="color:var(--muted); font-size:0.7rem;">ADMIN</span></div>
-      <div class="live-pill">
-        <div class="live-dot"></div>
-        <div class="live-num" id="liveNum">1</div>
-        <div style="font-size:0.7rem; line-height:1; margin-left:5px;"><strong>LIVE</strong><br><span style="color:var(--muted)">USUARIOS</span></div>
+      <div class="brand"><h1>DeployX</h1></div>
+    </div>
+
+    <div class="stats-card">
+      <div>
+        <div class="stat-lab">Total de Proyectos</div>
+        <div class="stat-val" id="totalCount">0</div>
+      </div>
+      <div style="text-align: right;">
+        <div class="stat-lab">Estado</div>
+        <div style="color: var(--success); font-weight: bold;">SISTEMA ACTIVO</div>
       </div>
     </div>
 
-    <div class="stats-row">
-      <div class="stat-card"><div class="stat-label">Proyectos</div><div class="stat-value" id="statProjects">0</div></div>
-      <div class="stat-card"><div class="stat-label">Servidor</div><div class="stat-value" style="color:var(--success)">ONLINE</div></div>
+    <div class="upload-box">
+      <input type="text" id="pName" placeholder="Nombre del proyecto (ej: tienda-web)">
+      <input type="file" id="pZip" accept=".zip" style="margin-bottom: 1rem; display: block; width: 100%;">
+      <button class="btn-main" onclick="subir()">🚀 DESPLEGAR PROYECTO</button>
     </div>
 
-    <div class="upload-panel">
-      <div class="upload-grid">
-        <div class="field">
-          <input type="text" id="projName" placeholder="Nombre del proyecto..."/>
-        </div>
-        <div class="field">
-          <div class="dropzone" onclick="document.getElementById('zipFile').click()">
-            <input type="file" id="zipFile" accept=".zip" style="display:none"/>
-            <span id="fileName">📦 Seleccionar .zip</span>
-          </div>
-        </div>
-      </div>
-      <button class="upload-btn" onclick="upload()">🚀 PUBLICAR AHORA</button>
-      <div id="uploadStatus"></div>
-    </div>
-
+    <h2 style="font-family: 'Syne'; margin-bottom: 1rem; font-size: 1.2rem;">Mis Sitios Web</h2>
     <div id="projectList"></div>
-    <p style="text-align:center; color:#1e2535; font-size:0.7rem; margin-top:3rem;">MORELOS CLOUD · 2026</p>
   </div>
 
   <script>
-    const liveNumEl = document.getElementById('liveNum');
-    const zipInput = document.getElementById('zipFile');
-    const fileNameEl = document.getElementById('fileName');
+    async function cargar() {
+      const res = await fetch('/api/projects');
+      const data = await res.json();
+      document.getElementById('totalCount').innerText = data.projects.length;
+      document.getElementById('projectList').innerHTML = data.projects.map(p => `
+        <div class="project-card">
+          <span>🌐 ${p}</span>
+          <div>
+            <a class="btn-view" href="/sites/${p}/index.html" target="_blank">VER SITIO</a>
+            <button class="btn-del" onclick="borrar('${p}')">ELIMINAR</button>
+          </div>
+        </div>`).join('');
+    }
 
-    zipInput.onchange = () => { if(zipInput.files[0]) fileNameEl.innerText = "✅ " + zipInput.files[0].name; };
+    async function subir() {
+      const name = document.getElementById('pName').value.trim();
+      const file = document.getElementById('pZip').files[0];
+      if(!name || !file) return alert("Completa los datos");
 
-    async function syncRadar() {
+      const fd = new FormData();
+      fd.append('name', name);
+      fd.append('zipfile', file);
+
       try {
-        const res = await fetch('/api/projects');
-        const data = await res.json();
-
-        // REGLA DE ORO: Solo lo que diga el servidor
-        if (liveNumEl.innerText !== String(data.online)) {
-          liveNumEl.innerText = data.online;
-          liveNumEl.classList.add('bump');
-          setTimeout(() => liveNumEl.classList.remove('bump'), 300);
+        const res = await fetch('/deploy', { method: 'POST', body: fd });
+        if(res.ok) {
+          alert("¡Web publicada!");
+          cargar();
         }
-        document.getElementById('statProjects').innerText = data.projects.length;
+      } catch (e) { alert("Error al subir"); }
+    }
 
+    async function borrar(n) {
+      if(confirm(`¿Eliminar ${n}?`)) {
+        await fetch(`/api/projects/${n}`, { method: 'DELETE' });
+        cargar();
+      }
+    }
+
+    cargar(); // Carga inicial
+  </script>
+</body>
+</html>
         const list = document.getElementById('projectList');
         list.innerHTML = data.projects.map(p => `
           <div class="project-card">
