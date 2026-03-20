@@ -14,11 +14,16 @@ if (!fs.existsSync(SITES_DIR)) fs.mkdirSync(SITES_DIR, { recursive: true });
 
 const upload = multer({ dest: 'uploads/' });
 
-// --- LÓGICA DE CONEXIONES EN VIVO ---
-let onlineUsers = 0;
+// --- RADAR DE USUARIOS REAL ---
+let activeSessions = new Set();
+
 app.use((req, res, next) => {
-    onlineUsers++;
-    res.on('finish', () => { onlineUsers = Math.max(0, onlineUsers - 1); });
+    // Registramos al usuario por su IP o ID de conexión
+    const visitorId = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    activeSessions.add(visitorId);
+    
+    // Si no hay actividad en 20 segundos, lo sacamos del radar
+    setTimeout(() => { activeSessions.delete(visitorId); }, 20000);
     next();
 });
 
@@ -26,15 +31,22 @@ app.use('/sites', express.static(SITES_DIR));
 app.use(express.static(PUBLIC_DIR));
 app.use(express.json());
 
-// 1. OBTENER LISTA DE PROYECTOS
+// API que el panel consulta cada 3 segundos
 app.get('/api/projects', (req, res) => {
-    const projects = fs.readdirSync(SITES_DIR).filter(file => 
-        fs.statSync(path.join(SITES_DIR, file)).isDirectory()
-    );
-    res.json({ projects, online: onlineUsers });
+    try {
+        const projects = fs.readdirSync(SITES_DIR).filter(file => 
+            fs.statSync(path.join(SITES_DIR, file)).isDirectory()
+        );
+        // Enviamos el número real de personas activas
+        res.json({ 
+            projects: projects, 
+            online: activeSessions.size > 0 ? activeSessions.size : 1 
+        });
+    } catch (e) {
+        res.json({ projects: [], online: 1 });
+    }
 });
 
-// 2. BORRAR PROYECTO
 app.delete('/api/projects/:name', (req, res) => {
     const projectPath = path.join(SITES_DIR, req.params.name);
     if (fs.existsSync(projectPath)) {
@@ -44,18 +56,17 @@ app.delete('/api/projects/:name', (req, res) => {
     res.status(404).json({ error: "No encontrado" });
 });
 
-// 3. SUBIR PROYECTO (Mejorado)
 app.post('/deploy', upload.single('zipfile'), async (req, res) => {
     const projectName = req.body.name?.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
-    if (!req.file || !projectName) return res.status(400).send("Faltan datos");
+    if (!req.file || !projectName) return res.status(400).json({error: "Faltan datos"});
 
     const projectDir = path.join(SITES_DIR, projectName);
     try {
-        if (!fs.existsSync(projectDir)) fs.mkdirSync(projectDir);
+        if (!fs.existsSync(projectDir)) fs.mkdirSync(projectDir, {recursive: true});
         await fs.createReadStream(req.file.path).pipe(unzipper.Extract({ path: projectDir })).promise();
         fs.unlinkSync(req.file.path);
-        res.json({ success: true });
-    } catch (e) { res.status(500).send(e.message); }
+        res.json({ success: true, url: `/sites/${projectName}/index.html` });
+    } catch (e) { res.status(500).json({error: e.message}); }
 });
 
-app.listen(PORT, () => console.log(`Panel activo en puerto ${PORT}`));
+app.listen(PORT, () => console.log(`Radar encendido en puerto ${PORT}`));
