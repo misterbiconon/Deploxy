@@ -146,7 +146,7 @@
 
     async function deleteProj(name) {
       if (confirm(`¿Borrar "${name}"?`)) {
-        await fetch(`/api/projects/${name}`, { method: 'DELETE' });
+        await fetch(`/api/projects/${name}`, { method: 'BORRAR' });
         syncRadar();
       }
     }
