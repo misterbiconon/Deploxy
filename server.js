@@ -14,35 +14,19 @@ if (!fs.existsSync(SITES_DIR)) fs.mkdirSync(SITES_DIR, { recursive: true });
 
 const upload = multer({ dest: 'uploads/' });
 
-// --- RADAR DE USUARIOS REAL (POR IP) ---
-let activeSessions = new Set();
-
-app.use((req, res, next) => {
-    // Registramos la IP del visitante
-    const visitorId = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
-    activeSessions.add(visitorId);
-    
-    // Si no hay señal en 20 segundos, lo borramos
-    setTimeout(() => { activeSessions.delete(visitorId); }, 20000);
-    next();
-});
-
 app.use('/sites', express.static(SITES_DIR));
 app.use(express.static(PUBLIC_DIR));
 app.use(express.json());
 
-// API que entrega la verdad al panel
+// API solo para proyectos
 app.get('/api/projects', (req, res) => {
     try {
         const projects = fs.readdirSync(SITES_DIR).filter(file => 
             fs.statSync(path.join(SITES_DIR, file)).isDirectory()
         );
-        res.json({ 
-            projects: projects, 
-            online: activeSessions.size > 0 ? activeSessions.size : 1 
-        });
+        res.json({ projects });
     } catch (e) {
-        res.json({ projects: [], online: 1 });
+        res.json({ projects: [] });
     }
 });
 
@@ -72,4 +56,4 @@ app.post('/deploy', upload.single('zipfile'), async (req, res) => {
     } catch (e) { res.status(500).json({error: e.message}); }
 });
 
-app.listen(PORT, () => console.log(`Servidor DeployX activo en puerto ${PORT}`));
+app.listen(PORT, () => console.log(`Panel DeployX listo en puerto ${PORT}`));
