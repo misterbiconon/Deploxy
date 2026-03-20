@@ -18,11 +18,11 @@ const upload = multer({ dest: 'uploads/' });
 let activeSessions = new Set();
 
 app.use((req, res, next) => {
-    // Registramos al usuario por su IP o ID de conexión
+    // Identificador único por IP
     const visitorId = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     activeSessions.add(visitorId);
     
-    // Si no hay actividad en 20 segundos, lo sacamos del radar
+    // Si no hay señal en 20 segundos, se elimina del conteo
     setTimeout(() => { activeSessions.delete(visitorId); }, 20000);
     next();
 });
@@ -31,13 +31,12 @@ app.use('/sites', express.static(SITES_DIR));
 app.use(express.static(PUBLIC_DIR));
 app.use(express.json());
 
-// API que el panel consulta cada 3 segundos
 app.get('/api/projects', (req, res) => {
     try {
         const projects = fs.readdirSync(SITES_DIR).filter(file => 
             fs.statSync(path.join(SITES_DIR, file)).isDirectory()
         );
-        // Enviamos el número real de personas activas
+        // Enviamos el número real. Si no hay nadie, marca 1 (tú).
         res.json({ 
             projects: projects, 
             online: activeSessions.size > 0 ? activeSessions.size : 1 
@@ -69,4 +68,4 @@ app.post('/deploy', upload.single('zipfile'), async (req, res) => {
     } catch (e) { res.status(500).json({error: e.message}); }
 });
 
-app.listen(PORT, () => console.log(`Radar encendido en puerto ${PORT}`));
+app.listen(PORT, () => console.log(`Radar real encendido en puerto ${PORT}`));
