@@ -1,139 +1,111 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>DeployX — Panel de Control</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DeployX — Panel de Control</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #05060d; --bg2: #090b14; --bg3: #0d1020; --border: rgba(255,255,255,0.06);
+      --accent: #00e5ff; --accent2: #bf5af2; --green: #00ffa3; --red: #ff4d6d;
+      --text: #eceef8; --muted: #4a5068; --muted2: #6b7394;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+    .bg-grid { position: fixed; inset: 0; z-index: 0; background-image: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
+    .orb { position: fixed; border-radius: 50%; filter: blur(120px); opacity: 0.07; z-index: 0; pointer-events: none; }
+    .orb-1 { width: 500px; height: 500px; background: var(--accent); top: -200px; left: -150px; }
+    .wrap { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 0 20px 80px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 0 28px; border-bottom: 1px solid var(--border); margin-bottom: 36px; }
+    .logo { display: flex; align-items: center; gap: 12px; }
+    .logo-mark { width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), var(--accent2)); display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 0 24px #00e5ff33; }
+    .logo-text { font-family: 'Syne', sans-serif; font-size: 22px; background: linear-gradient(135deg, #fff 30%, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .status-pill { display: flex; align-items: center; gap: 7px; background: #00ffa310; border: 1px solid #00ffa330; border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 600; color: var(--green); }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 8px var(--green); animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .stats-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; margin-bottom: 32px; }
+    .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; transition: all 0.2s; }
+    .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+    .stat-value { font-family: 'Syne', sans-serif; font-size: 2.4rem; color: var(--accent); line-height: 1; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 18px; padding: 28px; margin-bottom: 28px; }
+    .input { width: 100%; padding: 12px 16px; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; color: var(--text); margin-bottom: 18px; outline: none; }
+    .drop-zone { border: 2px dashed var(--border); border-radius: 14px; padding: 32px; text-align: center; cursor: pointer; margin-bottom: 20px; background: var(--bg3); position: relative; }
+    .btn-deploy { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-weight: 800; cursor: pointer; }
+    .proj-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .btn-sm { padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; cursor: pointer; text-decoration: none; border: 1px solid; }
+    .btn-view { background: #00e5ff10; border-color: #00e5ff30; color: var(--accent); }
+    .btn-del { background: #ff4d6d10; border-color: #ff4d6d30; color: var(--red); }
+  </style>
+</head>
+<body>
+  <div class="bg-grid"></div>
+  <div class="orb orb-1"></div>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="logo">
+        <div class="logo-mark">🚀</div>
+        <div>
+          <div class="logo-text">DeployX</div>
+          <div style="font-size: 10px; color: var(--muted);">PANEL DE CONTROL</div>
+        </div>
+      </div>
+      <div class="status-pill"><div class="status-dot"></div> Servidor Online</div>
+    </div>
 
-:root {
-  --bg:       #05060d;
-  --bg2:      #090b14;
-  --bg3:      #0d1020;
-  --border:   rgba(255,255,255,0.06);
-  --border2:  rgba(255,255,255,0.11);
-  --accent:   #00e5ff;
-  --accent2:  #bf5af2;
-  --green:    #00ffa3;
-  --red:      #ff4d6d;
-  --text:     #eceef8;
-  --muted:    #4a5068;
-  --muted2:   #6b7394;
-}
+    <div class="stats-row">
+      <div class="stat-card"><div class="stat-label">Proyectos</div><div class="stat-value" id="totalCount">0</div></div>
+      <div class="stat-card"><div class="stat-label">Estado</div><div class="stat-value" style="font-size: 1rem; margin-top:10px;">LISTO ✓</div></div>
+      <div class="stat-card"><div class="stat-label">Región</div><div class="stat-value" style="font-size: 1rem; margin-top:10px;">Morelos</div></div>
+    </div>
 
-body {
-  font-family: 'DM Sans', sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+    <div class="card">
+      <input type="text" class="input" id="pName" placeholder="Nombre del proyecto"/>
+      <div class="drop-zone">
+        <input type="file" id="pZip" accept=".zip" style="position:absolute; inset:0; opacity:0; cursor:pointer;"/>
+        <div style="font-size:30px;">📦</div>
+        <p style="font-size:14px; color:var(--muted2);">Sube tu archivo ZIP aquí</p>
+      </div>
+      <button class="btn-deploy" onclick="subir()">PUBLICAR AHORA</button>
+    </div>
 
-.bg-grid {
-  position: fixed; inset: 0; z-index: 0;
-  background-image:
-    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-  background-size: 40px 40px;
-  pointer-events: none;
-}
-.orb {
-  position: fixed; border-radius: 50%;
-  filter: blur(120px); opacity: 0.07; z-index: 0; pointer-events: none;
-}
-.orb-1 { width: 500px; height: 500px; background: var(--accent);  top: -200px; left: -150px; }
-.orb-2 { width: 400px; height: 400px; background: var(--accent2); bottom: -150px; right: -100px; }
+    <h2 style="font-family:'Syne'; font-size:18px; margin-bottom:15px;">Mis sitios web</h2>
+    <div id="projectList"></div>
+  </div>
 
-.wrap { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; padding: 0 20px 80px; }
+  <script>
+    async function cargar() {
+      try {
+        const res = await fetch('/api/projects');
+        const data = await res.json();
+        document.getElementById('totalCount').innerText = data.projects.length;
+        document.getElementById('projectList').innerHTML = data.projects.map(p => `
+          <div class="proj-card">
+            <div><div style="font-weight:600;">${p}</div><div style="font-size:10px; color:var(--muted);">/sites/${p}/index.html</div></div>
+            <div style="display:flex; gap:8px;">
+              <a class="btn-sm btn-view" href="/sites/${p}/index.html" target="_blank">Ver</a>
+              <button class="btn-sm btn-del" onclick="borrar('${p}')">Borrar</button>
+            </div>
+          </div>`).join('');
+      } catch(e) {}
+    }
 
-/* TOPBAR */
-.topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 20px 0 28px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 36px;
-}
-.logo { display: flex; align-items: center; gap: 12px; }
-.logo-mark {
-  width: 38px; height: 38px; border-radius: 10px;
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 18px; box-shadow: 0 0 24px #00e5ff33;
-}
-.logo-text {
-  font-family: 'Syne', sans-serif; font-size: 22px;
-  background: linear-gradient(135deg, #fff 30%, var(--accent));
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-}
-.logo-sub { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-top: 1px; }
-.status-pill {
-  display: flex; align-items: center; gap: 7px;
-  background: #00ffa310; border: 1px solid #00ffa330;
-  border-radius: 20px; padding: 6px 14px;
-  font-size: 12px; font-weight: 600; color: var(--green);
-}
-.status-dot {
-  width: 7px; height: 7px; border-radius: 50%;
-  background: var(--green); box-shadow: 0 0 8px var(--green);
-  animation: blink 2s infinite;
-}
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    async function subir() {
+      const name = document.getElementById('pName').value.trim();
+      const file = document.getElementById('pZip').files[0];
+      if(!name || !file) return alert("Faltan datos");
+      const fd = new FormData(); fd.append('name', name); fd.append('zipfile', file);
+      const res = await fetch('/deploy', { method: 'POST', body: fd });
+      if(res.ok) { alert("¡Publicado!"); cargar(); }
+    }
 
-/* STATS */
-.stats-row {
-  display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;
-  margin-bottom: 32px;
-}
-.stat-card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 14px; padding: 20px 22px;
-  transition: border-color 0.2s, transform 0.2s;
-}
-.stat-card:hover { border-color: var(--border2); transform: translateY(-2px); }
-.stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
-.stat-value { font-family: 'Syne', sans-serif; font-size: 2.4rem; color: var(--accent); line-height: 1; }
-.stat-value.green { color: var(--green); }
-.stat-value.purple { color: var(--accent2); }
-.stat-value.small { font-size: 1rem; margin-top: 6px; font-family: 'DM Sans'; font-weight: 600; }
-
-/* CARD */
-.card {
-  background: var(--bg2); border: 1px solid var(--border);
-  border-radius: 18px; padding: 28px;
-  margin-bottom: 28px;
-}
-.card-title {
-  font-family: 'Syne', sans-serif; font-size: 13px;
-  color: var(--muted2); text-transform: uppercase; letter-spacing: 2px;
-  margin-bottom: 22px; display: flex; align-items: center; gap: 8px;
-}
-.card-title::before {
-  content: ''; display: block; width: 3px; height: 16px;
-  background: linear-gradient(var(--accent), var(--accent2));
-  border-radius: 2px;
-}
-.field-label { font-size: 12px; color: var(--muted2); margin-bottom: 6px; font-weight: 600; }
-
-.input {
-  width: 100%; padding: 12px 16px;
-  background: var(--bg3); border: 1px solid var(--border);
-  border-radius: 10px; color: var(--text);
-  font-family: 'DM Sans'; font-size: 14px;
-  outline: none; transition: border-color 0.2s, box-shadow 0.2s;
-  margin-bottom: 18px;
-}
-.input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #00e5ff12; }
-.input::placeholder { color: var(--muted); }
-
-/* Drop zone */
-.drop-zone {
-  border: 2px dashed var(--border2); border-radius: 14px;
-  padding: 32px; text-align: center;
-  cursor: pointer; transition: all 0.2s;
-  margin-bottom: 20px; background: var(--bg3);
-  position: relative;
+    async function borrar(n) {
+      if(confirm(`¿Eliminar ${n}?`)) { await fetch('/api/projects/'+n, {method:'DELETE'}); cargar(); }
+    }
+    cargar();
+  </script>
+</body>
+</html>
 }
 .drop-zone:hover, .drop-zone.active {
   border-color: var(--accent); background: #00e5ff06;
