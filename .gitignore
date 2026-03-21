@@ -2,4 +2,3 @@ node_modules/
 uploads/
 sites/
 .env
-*.log
