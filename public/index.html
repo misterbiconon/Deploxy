@@ -177,120 +177,97 @@
     async function syncRadar() {
       try {
         const res  = await fetch('/api/projects');
-        const data = await res.json();
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DeployX — Panel de Control</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #05060d; --bg2: #090b14; --border: rgba(255,255,255,0.06);
+      --accent: #00e5ff; --accent2: #bf5af2; --green: #00ffa3; --red: #ff4d6d;
+      --text: #eceef8; --muted: #4a5068;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px; }
+    .wrap { max-width: 800px; margin: 0 auto; position: relative; z-index: 1; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--border); margin-bottom: 30px; }
+    .logo-text { font-family: 'Syne', sans-serif; font-size: 24px; background: linear-gradient(135deg, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .card { background: var(--bg2); border: 1px solid var(--border); border-radius: 18px; padding: 25px; margin-bottom: 30px; }
+    .input { width: 100%; padding: 14px; background: #0d1020; border: 1px solid var(--border); border-radius: 10px; color: #fff; margin-bottom: 20px; outline: none; transition: 0.3s; }
+    .input:focus { border-color: var(--accent); }
+    .drop-zone { border: 2px dashed var(--border); border-radius: 14px; padding: 40px; text-align: center; cursor: pointer; background: #0d1020; position: relative; transition: 0.3s; }
+    .drop-zone.active { border-color: var(--accent); background: #00e5ff05; }
+    .btn-deploy { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-weight: 800; cursor: pointer; color: #000; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.2); }
+    .proj-card { background: var(--bg2); border: 1px solid var(--border); padding: 18px; border-radius: 14px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .btn-sm { padding: 8px 16px; border-radius: 8px; font-size: 12px; font-weight: 700; text-decoration: none; cursor: pointer; border: 1px solid; transition: 0.2s; }
+    .btn-view { background: #00e5ff10; color: var(--accent); border-color: #00e5ff30; }
+    .btn-del { background: #ff4d6d10; color: var(--red); border-color: #ff4d6d30; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="topbar">
+      <div class="logo-text">DeployX 🚀</div>
+      <div style="color:var(--green); font-size:12px; font-weight: 600;">● MODO ADMINISTRADOR</div>
+    </div>
 
-        // CONTADOR REAL: solo lo que devuelve data.online
-        const liveNumEl = document.getElementById('liveNum');
-        if (liveNumEl.innerText !== String(data.online)) {
-          liveNumEl.innerText = data.online;
-          liveNumEl.classList.remove('bump');
-          void liveNumEl.offsetWidth;
-          liveNumEl.classList.add('bump');
-        }
+    <div class="card">
+      <input type="text" id="pName" class="input" placeholder="Nombre del proyecto..."/>
+      <div class="drop-zone" id="dz">
+        <input type="file" id="pZip" accept=".zip,.html" style="position:absolute; inset:0; opacity:0; cursor:pointer;" onchange="updateFile(this)"/>
+        <div id="icon" style="font-size:40px; margin-bottom:10px;">📦</div>
+        <div id="txt" style="font-size:14px; color:var(--muted);">Sube tu archivo <b>ZIP</b> o <b>HTML</b></div>
+      </div>
+      <button class="btn-deploy" style="margin-top:20px;" onclick="subir()">▲ PUBLICAR AHORA</button>
+    </div>
 
-        document.getElementById('statOnline').innerText  = data.online;
-        document.getElementById('statProjects').innerText = data.projects.length;
+    <h2 style="font-family:'Syne'; font-size:20px; margin-bottom:20px;">Proyectos Activos</h2>
+    <div id="list"></div>
+  </div>
 
-        // Countdown visual
-        let cd = 3;
-        const cdEl = document.getElementById('countdown');
-        cdEl.innerText = cd;
-        clearInterval(window._cdTimer);
-        window._cdTimer = setInterval(() => {
-          cd--;
-          cdEl.innerText = cd;
-          if (cd <= 0) clearInterval(window._cdTimer);
-        }, 1000);
-
-        // Lista de proyectos
-        const list = document.getElementById('projectList');
-        if (data.projects.length === 0) {
-          list.innerHTML = `<div class="empty-state"><span class="icon">🛸</span><p>Aún no tienes proyectos.</p></div>`;
-          return;
-        }
-        list.innerHTML = data.projects.map((p, i) => `
-          <div class="project-card" style="animation-delay:${i * 0.05}s">
-            <div class="proj-info">
-              <div class="proj-icon">🌐</div>
-              <div>
-                <div class="proj-name">${p}</div>
-                <div class="proj-url">/sites/${p}/</div>
-              </div>
-            </div>
-            <div class="proj-actions">
-              <a class="btn-view" href="/sites/${p}/index.html" target="_blank">↗ Ver web</a>
-              <button class="btn-del" onclick="deleteProj('${p}')">✕ Borrar</button>
-            </div>
-          </div>`).join('');
-
-      } catch (err) {
-        console.error('Error conectando con el servidor:', err);
-        document.getElementById('liveNum').innerText = '—';
+  <script>
+    function updateFile(input) {
+      const file = input.files[0];
+      if(file) {
+        document.getElementById('dz').classList.add('active');
+        document.getElementById('icon').textContent = file.name.endsWith('.html') ? "📄" : "📦";
+        document.getElementById('txt').innerHTML = `<span style="color:var(--accent)">Detectado:</span> ${file.name}`;
       }
     }
 
-    // ── UPLOAD ────────────────────────────────────────────────────────
-    const zipInput = document.getElementById('zipFile');
-    const fileNameEl = document.getElementById('fileName');
-    const dropzone = document.getElementById('dropzone');
-
-    zipInput.addEventListener('change', () => {
-      if (zipInput.files[0]) fileNameEl.textContent = '✓ ' + zipInput.files[0].name;
-    });
-    dropzone.addEventListener('dragover',  e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
-    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
-    dropzone.addEventListener('drop', e => {
-      e.preventDefault(); dropzone.classList.remove('drag-over');
-      if (e.dataTransfer.files[0]) { zipInput.files = e.dataTransfer.files; fileNameEl.textContent = '✓ ' + e.dataTransfer.files[0].name; }
-    });
-
-    async function upload() {
-      const name = document.getElementById('projName').value.trim();
-      const file = zipInput.files[0];
-      const statusEl = document.getElementById('uploadStatus');
-      const btn = document.getElementById('uploadBtn');
-      if (!name || !file) {
-        statusEl.className = 'error';
-        statusEl.innerHTML = '❌ Ingresa un nombre y selecciona un .zip';
-        return;
-      }
-      btn.disabled = true;
-      btn.innerHTML = '<span class="shimmer"></span>⏳ Subiendo...';
-      statusEl.className = ''; statusEl.style.display = 'none';
-
-      const fd = new FormData();
-      fd.append('name', name);
-      fd.append('zipfile', file);
-
-      try {
-        const res    = await fetch('/deploy', { method: 'POST', body: fd });
-        const result = await res.json();
-        if (res.ok) {
-          statusEl.className = 'success';
-          statusEl.innerHTML = `✅ Publicado → <a href="${result.url}" target="_blank">Abrir sitio</a>`;
-          syncRadar();
-        } else {
-          statusEl.className = 'error';
-          statusEl.innerHTML = '❌ ' + (result.error || 'Error al subir.');
-        }
-      } catch {
-        statusEl.className = 'error';
-        statusEl.innerHTML = '❌ Error de conexión.';
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = '<span class="shimmer"></span>🚀 Publicar Ahora';
-      }
+    async function cargar() {
+      const res = await fetch('/api/projects');
+      const data = await res.json();
+      document.getElementById('list').innerHTML = data.projects.map(p => `
+        <div class="proj-card">
+          <div><b style="font-size:16px;">${p}</b><div style="font-size:11px; color:var(--muted)">/sites/${p}/index.html</div></div>
+          <div>
+            <a class="btn-sm btn-view" href="/sites/${p}/index.html" target="_blank">VER</a>
+            <button class="btn-sm btn-del" onclick="borrar('${p}')" style="margin-left:8px;">BORRAR</button>
+          </div>
+        </div>`).join('');
     }
 
-    async function deleteProj(name) {
-      if (!confirm(`¿Borrar "${name}" para siempre?`)) return;
-      await fetch(`/api/projects/${name}`, { method: 'DELETE' });
-      syncRadar();
+    async function subir() {
+      const name = document.getElementById('pName').value.trim();
+      const file = document.getElementById('pZip').files[0];
+      if(!name || !file) return alert("Faltan datos");
+      const fd = new FormData(); fd.append('name', name); fd.append('zipfile', file);
+      const res = await fetch('/deploy', { method: 'POST', body: fd });
+      if(res.ok) { alert("¡Proyecto Desplegado!"); cargar(); }
+      else { alert("Error en el servidor"); }
     }
 
-    // Actualiza cada 3 segundos — solo datos reales del servidor
-    setInterval(syncRadar, 3000);
-    syncRadar();
+    async function borrar(n) {
+      if(confirm(`¿Deseas eliminar permanentemente ${n}?`)) { 
+        await fetch('/api/projects/'+n, {method:'DELETE'}); 
+        cargar(); 
+      }
+    }
+    cargar();
   </script>
 </body>
 </html>
