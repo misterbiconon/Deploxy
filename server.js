@@ -4,8 +4,9 @@ const unzipper = require('unzipper');
 const path = require('path');
 const fs = require('fs');
 
-const app = express();
 const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`Servidor en puerto ${PORT}`));
+
 
 const SITES_DIR = path.join(__dirname, 'sites');
 const PUBLIC_DIR = path.join(__dirname, 'public');
