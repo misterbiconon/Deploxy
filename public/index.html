@@ -1,89 +1,296 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>DeployX — Morelos Edition</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
-<style>
-:root {
-  --bg: #05060d; --bg2: #090b14; --border: rgba(255,255,255,0.06);
-  --accent: #00e5ff; --accent2: #bf5af2; --green: #00ffa3; --text: #eceef8; --muted: #4a5068;
-}
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); padding: 20px; }
-.wrap { max-width: 800px; margin: 0 auto; }
-.topbar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; }
-.logo-text { font-family: 'Syne', sans-serif; font-size: 24px; background: linear-gradient(to right, #fff, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-.card { background: var(--bg2); border: 1px solid var(--border); border-radius: 18px; padding: 25px; margin-bottom: 30px; }
-.input { width: 100%; padding: 12px; background: #0d1020; border: 1px solid var(--border); border-radius: 10px; color: #fff; margin-bottom: 15px; outline: none; }
-.drop-zone { border: 2px dashed var(--border); border-radius: 14px; padding: 30px; text-align: center; cursor: pointer; background: #0d1020; position: relative; margin-bottom: 20px; }
-.drop-zone.active { border-color: var(--accent); background: #00e5ff05; }
-.btn-deploy { width: 100%; padding: 15px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; border-radius: 12px; font-family: 'Syne', sans-serif; font-weight: 800; cursor: pointer; color: #000; }
-.proj-card { background: var(--bg2); border: 1px solid var(--border); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; animation: fadeIn 0.3s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-.btn-sm { padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; text-decoration: none; cursor: pointer; border: 1px solid; }
-.btn-view { background: #00e5ff10; color: var(--accent); border-color: #00e5ff30; }
-.btn-del { background: #ff4d6d10; color: #ff4d6d; border-color: #ff4d6d30; margin-left: 8px; }
-</style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DeployX Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #06080f; --surface: #0d1117; --border: rgba(255,255,255,0.07);
+      --accent: #00e5ff; --accent2: #bf5af2; --text: #e8eaf2; --muted: #5a6177;
+      --success: #00ffa3; --danger: #ff4d6d; --warn: #ffb800;
+    }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem 4rem; }
+    body::before {
+      content: ''; position: fixed; inset: 0;
+      background-image: linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+      background-size: 40px 40px; z-index: 0; pointer-events: none;
+    }
+    .orb { position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; }
+    .orb1 { width:500px; height:500px; background: radial-gradient(circle, rgba(0,229,255,0.06) 0%, transparent 70%); top:-150px; left:-100px; animation: o1 10s ease-in-out infinite alternate; }
+    .orb2 { width:400px; height:400px; background: radial-gradient(circle, rgba(191,90,242,0.07) 0%, transparent 70%); bottom:-100px; right:-80px; animation: o2 12s ease-in-out infinite alternate; }
+    @keyframes o1 { to { transform: translate(60px,50px); } }
+    @keyframes o2 { to { transform: translate(-50px,-40px); } }
+    .page { position: relative; z-index: 1; max-width: 860px; margin: 0 auto; }
+
+    /* HEADER */
+    .header { display:flex; align-items:center; justify-content:space-between; margin-bottom:2.5rem; flex-wrap:wrap; gap:1rem; }
+    .brand { display:flex; align-items:center; gap:0.75rem; }
+    .brand h1 {
+      font-family: 'Syne', sans-serif; font-size:1.8rem; font-weight:800; letter-spacing:-0.03em;
+      background: linear-gradient(135deg, #fff 0%, var(--accent) 60%, var(--accent2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .brand-tag { font-size:0.7rem; letter-spacing:0.1em; text-transform:uppercase; color:var(--muted); background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:999px; padding:0.2rem 0.7rem; }
+
+    /* LIVE PILL */
+    .live-pill { display:flex; align-items:center; gap:0.55rem; background:rgba(0,255,163,0.06); border:1px solid rgba(0,255,163,0.2); border-radius:999px; padding:0.45rem 1.1rem; }
+    .live-dot { width:8px; height:8px; border-radius:50%; background:var(--success); box-shadow:0 0 0 0 rgba(0,255,163,0.5); animation:livePulse 1.8s ease-out infinite; flex-shrink:0; }
+    @keyframes livePulse { 0%{box-shadow:0 0 0 0 rgba(0,255,163,0.5);} 70%{box-shadow:0 0 0 8px rgba(0,255,163,0);} 100%{box-shadow:0 0 0 0 rgba(0,255,163,0);} }
+    .live-num { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; color:var(--success); min-width:18px; text-align:center; }
+    .live-num.bump { animation: bump 0.3s cubic-bezier(0.22,1,0.36,1); }
+    @keyframes bump { 50% { transform:scale(1.5); } }
+    .live-meta { display:flex; flex-direction:column; line-height:1.2; }
+    .live-meta strong { font-size:0.78rem; color:var(--success); }
+    .live-meta span   { font-size:0.68rem; color:var(--muted); letter-spacing:0.05em; text-transform:uppercase; }
+
+    /* STATS */
+    .stats-row { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; margin-bottom:2rem; }
+    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:1rem; padding:1.25rem 1.5rem; position:relative; overflow:hidden; animation:fadeUp 0.5s ease both; }
+    .stat-card::after { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg, transparent, var(--accent), transparent); opacity:0.3; }
+    .stat-card:nth-child(2)::after { background:linear-gradient(90deg, transparent, var(--accent2), transparent); }
+    .stat-card:nth-child(3)::after { background:linear-gradient(90deg, transparent, var(--warn), transparent); }
+    .stat-label { font-size:0.72rem; color:var(--muted); letter-spacing:0.08em; text-transform:uppercase; margin-bottom:0.4rem; }
+    .stat-value { font-family:'Syne',sans-serif; font-size:2rem; font-weight:800; color:var(--accent); }
+    .stat-card:nth-child(2) .stat-value { color:var(--accent2); }
+    .stat-card:nth-child(3) .stat-value { color:var(--warn); }
+
+    /* UPLOAD */
+    .upload-panel { background:var(--surface); border:1px solid var(--border); border-radius:1.25rem; padding:1.75rem; margin-bottom:2rem; position:relative; overflow:hidden; animation:fadeUp 0.6s ease both; }
+    .upload-panel::before { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg, transparent, var(--accent), var(--accent2), transparent); opacity:0.5; }
+    .panel-title { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; margin-bottom:1.25rem; }
+    .upload-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; align-items:end; }
+    @media(max-width:540px){ .upload-grid{grid-template-columns:1fr;} .stats-row{grid-template-columns:1fr;} }
+    .field label { display:block; font-size:0.72rem; font-weight:500; color:var(--muted); letter-spacing:0.07em; text-transform:uppercase; margin-bottom:0.5rem; }
+    .field input[type="text"] { width:100%; padding:0.8rem 1rem; background:rgba(255,255,255,0.04); border:1px solid var(--border); border-radius:0.65rem; color:var(--text); font-family:'DM Sans',sans-serif; font-size:0.9rem; outline:none; transition:border-color 0.2s, box-shadow 0.2s; }
+    .field input[type="text"]:focus { border-color:rgba(0,229,255,0.4); box-shadow:0 0 0 3px rgba(0,229,255,0.07); }
+    .field input[type="text"]::placeholder { color:#2a3050; }
+    .dropzone { border:2px dashed rgba(255,255,255,0.1); border-radius:0.65rem; padding:1.2rem 1rem; text-align:center; cursor:pointer; transition:all 0.2s; position:relative; background:rgba(255,255,255,0.02); }
+    .dropzone:hover,.dropzone.drag-over { border-color:var(--accent); background:rgba(0,229,255,0.04); }
+    .dropzone input[type="file"] { position:absolute; inset:0; opacity:0; cursor:pointer; width:100%; height:100%; }
+    .drop-hint { font-size:0.82rem; color:var(--muted); }
+    .drop-hint span { color:var(--accent); }
+    .file-chosen { font-size:0.78rem; color:var(--success); margin-top:0.4rem; }
+    .upload-btn { width:100%; padding:0.9rem; border:none; border-radius:0.65rem; font-family:'Syne',sans-serif; font-size:0.95rem; font-weight:700; cursor:pointer; background:linear-gradient(135deg, var(--accent), var(--accent2)); color:#06080f; transition:transform 0.2s, box-shadow 0.2s, opacity 0.2s; box-shadow:0 4px 20px rgba(0,229,255,0.2); position:relative; overflow:hidden; margin-top:0.25rem; }
+    .upload-btn:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 8px 28px rgba(0,229,255,0.3); }
+    .upload-btn:disabled { opacity:0.5; cursor:not-allowed; }
+    .upload-btn .shimmer { position:absolute; top:0; left:-100%; width:60%; height:100%; background:linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent); animation:shimmer 2.5s infinite; }
+    @keyframes shimmer { 100%{left:200%;} }
+    #uploadStatus { margin-top:1rem; padding:0.85rem 1rem; border-radius:0.65rem; font-size:0.88rem; display:none; }
+    #uploadStatus.success { display:block; background:rgba(0,255,163,0.07); border:1px solid rgba(0,255,163,0.25); color:var(--success); }
+    #uploadStatus.error   { display:block; background:rgba(255,77,109,0.07); border:1px solid rgba(255,77,109,0.25); color:var(--danger); }
+    #uploadStatus a { color:var(--accent); font-weight:600; text-decoration:none; }
+
+    /* PROJECTS */
+    .section-title { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; justify-content:space-between; }
+    .section-title span { color:var(--muted); font-size:0.78rem; font-family:'DM Sans',sans-serif; font-weight:400; }
+    .project-list { display:flex; flex-direction:column; gap:0.75rem; }
+    .project-card { background:var(--surface); border:1px solid var(--border); border-radius:1rem; padding:1rem 1.25rem; display:flex; align-items:center; justify-content:space-between; gap:1rem; transition:border-color 0.2s, transform 0.2s; animation:fadeUp 0.4s ease both; }
+    .project-card:hover { border-color:rgba(0,229,255,0.2); transform:translateX(3px); }
+    .proj-info { display:flex; align-items:center; gap:0.75rem; }
+    .proj-icon { width:38px; height:38px; border-radius:0.6rem; background:linear-gradient(135deg, rgba(0,229,255,0.15), rgba(191,90,242,0.15)); display:flex; align-items:center; justify-content:center; font-size:1.1rem; flex-shrink:0; }
+    .proj-name { font-weight:500; font-size:0.95rem; }
+    .proj-url  { font-size:0.75rem; color:var(--muted); margin-top:2px; }
+    .proj-actions { display:flex; gap:0.5rem; flex-shrink:0; }
+    .btn-view { display:inline-flex; align-items:center; gap:0.3rem; background:rgba(0,229,255,0.1); border:1px solid rgba(0,229,255,0.25); color:var(--accent); padding:0.45rem 0.9rem; border-radius:0.5rem; font-size:0.78rem; font-weight:600; text-decoration:none; cursor:pointer; transition:background 0.2s; }
+    .btn-view:hover { background:rgba(0,229,255,0.18); }
+    .btn-del { display:inline-flex; align-items:center; gap:0.3rem; background:rgba(255,77,109,0.1); border:1px solid rgba(255,77,109,0.25); color:var(--danger); padding:0.45rem 0.9rem; border-radius:0.5rem; font-size:0.78rem; font-weight:600; cursor:pointer; transition:background 0.2s; }
+    .btn-del:hover { background:rgba(255,77,109,0.2); }
+    .empty-state { text-align:center; padding:3rem 1rem; color:var(--muted); border:2px dashed var(--border); border-radius:1rem; }
+    .empty-state .icon { font-size:2.5rem; margin-bottom:0.75rem; display:block; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:translateY(0);} }
+    .footer { text-align:center; margin-top:3rem; font-size:0.72rem; color:#1e2535; letter-spacing:0.06em; }
+  </style>
 </head>
 <body>
-<div class="wrap">
-  <div class="topbar">
-    <div class="logo-text">DeployX 🚀</div>
-    <div style="color:var(--green); font-size:12px;">● Servidor Online</div>
-  </div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
 
-  <div class="card">
-    <input type="text" class="input" id="pName" placeholder="Nombre del proyecto (ej: codex)"/>
-    <div class="drop-zone" id="dz">
-      <input type="file" id="pZip" accept=".zip,.html" style="position:absolute; inset:0; opacity:0; cursor:pointer;" onchange="updateFile(this)"/>
-      <div id="icon" style="font-size:35px; margin-bottom:10px;">📦</div>
-      <div id="txt" style="font-size:14px; color:var(--muted);">Sube tu <b>ZIP</b> o <b>HTML</b></div>
-    </div>
-    <button class="btn-deploy" onclick="subir()">▲ PUBLICAR AHORA</button>
-  </div>
-
-  <h2 style="font-family:'Syne'; font-size:18px; margin-bottom:15px;">Mis Sitios Web</h2>
-  <div id="list"></div>
-</div>
-
-<script>
-function updateFile(input) {
-  const file = input.files[0];
-  if(file) {
-    document.getElementById('dz').classList.add('active');
-    document.getElementById('icon').textContent = file.name.endsWith('.html') ? "📄" : "📦";
-    document.getElementById('txt').innerHTML = `<span style="color:var(--accent)">Seleccionado:</span> ${file.name}`;
-  }
-}
-
-async function cargar() {
-  const res = await fetch('/api/projects');
-  const data = await res.json();
-  document.getElementById('list').innerHTML = data.projects.map(p => `
-    <div class="proj-card">
-      <div><b>${p}</b><div style="font-size:10px; color:var(--muted)">/sites/${p}/index.html</div></div>
-      <div>
-        <a class="btn-sm btn-view" href="/sites/${p}/index.html" target="_blank">Ver</a>
-        <button class="btn-sm btn-del" onclick="borrar('${p}')">Borrar</button>
+  <div class="page">
+    <div class="header">
+      <div class="brand">
+        <h1>DeployX</h1>
+        <span class="brand-tag">Admin</span>
       </div>
-    </div>`).join('');
-}
+      <div class="live-pill">
+        <div class="live-dot"></div>
+        <div class="live-num" id="liveNum">—</div>
+        <div class="live-meta">
+          <strong>en línea</strong>
+          <span>ahora mismo</span>
+        </div>
+      </div>
+    </div>
 
-async function subir() {
-  const name = document.getElementById('pName').value.trim();
-  const file = document.getElementById('pZip').files[0];
-  if(!name || !file) return alert("Faltan datos");
-  const fd = new FormData(); fd.append('name', name); fd.append('zipfile', file);
-  const res = await fetch('/deploy', { method: 'POST', body: fd });
-  if(res.ok) { alert("¡Publicado!"); cargar(); }
-}
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Proyectos activos</div>
+        <div class="stat-value" id="statProjects">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Usuarios en vivo</div>
+        <div class="stat-value" id="statOnline">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Estado del servidor</div>
+        <div class="stat-value" style="font-size:1.1rem;padding-top:0.4rem;">✅ OK</div>
+      </div>
+    </div>
 
-async function borrar(n) {
-  if(confirm(`¿Borrar ${n}?`)) { await fetch('/api/projects/'+n, {method:'DELETE'}); cargar(); }
-}
-cargar();
-</script>
+    <div class="upload-panel">
+      <div class="panel-title">📤 Subir nuevo proyecto</div>
+      <div class="upload-grid">
+        <div class="field">
+          <label>Nombre del proyecto</label>
+          <input type="text" id="projName" placeholder="ej: mi-portafolio"/>
+        </div>
+        <div class="field">
+          <label>Archivo .zip</label>
+          <div class="dropzone" id="dropzone">
+            <input type="file" id="zipFile" accept=".zip"/>
+            <div class="drop-hint">📦 Arrastra o <span>selecciona</span> tu .zip</div>
+            <div class="file-chosen" id="fileName"></div>
+          </div>
+        </div>
+      </div>
+      <button class="upload-btn" id="uploadBtn" onclick="upload()">
+        <span class="shimmer"></span>🚀 Publicar Ahora
+      </button>
+      <div id="uploadStatus"></div>
+    </div>
+
+    <div class="section-title">
+      Mis Proyectos
+      <span>Actualiza cada <span id="countdown">3</span>s</span>
+    </div>
+    <div class="project-list" id="projectList">
+      <div class="empty-state"><span class="icon">🛸</span><p>Cargando...</p></div>
+    </div>
+
+    <p class="footer">DEPLOYX · HOSTING PERSONAL · MORELOS</p>
+  </div>
+
+  <script>
+    // ── SINCRONIZACIÓN REAL — SIN Math.random() NI SIMULACIÓN ─────────
+    async function syncRadar() {
+      try {
+        const res  = await fetch('/api/projects');
+        const data = await res.json();
+
+        // CONTADOR REAL: solo lo que devuelve data.online
+        const liveNumEl = document.getElementById('liveNum');
+        if (liveNumEl.innerText !== String(data.online)) {
+          liveNumEl.innerText = data.online;
+          liveNumEl.classList.remove('bump');
+          void liveNumEl.offsetWidth;
+          liveNumEl.classList.add('bump');
+        }
+
+        document.getElementById('statOnline').innerText  = data.online;
+        document.getElementById('statProjects').innerText = data.projects.length;
+
+        // Countdown visual
+        let cd = 3;
+        const cdEl = document.getElementById('countdown');
+        cdEl.innerText = cd;
+        clearInterval(window._cdTimer);
+        window._cdTimer = setInterval(() => {
+          cd--;
+          cdEl.innerText = cd;
+          if (cd <= 0) clearInterval(window._cdTimer);
+        }, 1000);
+
+        // Lista de proyectos
+        const list = document.getElementById('projectList');
+        if (data.projects.length === 0) {
+          list.innerHTML = `<div class="empty-state"><span class="icon">🛸</span><p>Aún no tienes proyectos.</p></div>`;
+          return;
+        }
+        list.innerHTML = data.projects.map((p, i) => `
+          <div class="project-card" style="animation-delay:${i * 0.05}s">
+            <div class="proj-info">
+              <div class="proj-icon">🌐</div>
+              <div>
+                <div class="proj-name">${p}</div>
+                <div class="proj-url">/sites/${p}/</div>
+              </div>
+            </div>
+            <div class="proj-actions">
+              <a class="btn-view" href="/sites/${p}/index.html" target="_blank">↗ Ver web</a>
+              <button class="btn-del" onclick="deleteProj('${p}')">✕ Borrar</button>
+            </div>
+          </div>`).join('');
+
+      } catch (err) {
+        console.error('Error conectando con el servidor:', err);
+        document.getElementById('liveNum').innerText = '—';
+      }
+    }
+
+    // ── UPLOAD ────────────────────────────────────────────────────────
+    const zipInput = document.getElementById('zipFile');
+    const fileNameEl = document.getElementById('fileName');
+    const dropzone = document.getElementById('dropzone');
+
+    zipInput.addEventListener('change', () => {
+      if (zipInput.files[0]) fileNameEl.textContent = '✓ ' + zipInput.files[0].name;
+    });
+    dropzone.addEventListener('dragover',  e => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+    dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault(); dropzone.classList.remove('drag-over');
+      if (e.dataTransfer.files[0]) { zipInput.files = e.dataTransfer.files; fileNameEl.textContent = '✓ ' + e.dataTransfer.files[0].name; }
+    });
+
+    async function upload() {
+      const name = document.getElementById('projName').value.trim();
+      const file = zipInput.files[0];
+      const statusEl = document.getElementById('uploadStatus');
+      const btn = document.getElementById('uploadBtn');
+      if (!name || !file) {
+        statusEl.className = 'error';
+        statusEl.innerHTML = '❌ Ingresa un nombre y selecciona un .zip';
+        return;
+      }
+      btn.disabled = true;
+      btn.innerHTML = '<span class="shimmer"></span>⏳ Subiendo...';
+      statusEl.className = ''; statusEl.style.display = 'none';
+
+      const fd = new FormData();
+      fd.append('name', name);
+      fd.append('zipfile', file);
+
+      try {
+        const res    = await fetch('/deploy', { method: 'POST', body: fd });
+        const result = await res.json();
+        if (res.ok) {
+          statusEl.className = 'success';
+          statusEl.innerHTML = `✅ Publicado → <a href="${result.url}" target="_blank">Abrir sitio</a>`;
+          syncRadar();
+        } else {
+          statusEl.className = 'error';
+          statusEl.innerHTML = '❌ ' + (result.error || 'Error al subir.');
+        }
+      } catch {
+        statusEl.className = 'error';
+        statusEl.innerHTML = '❌ Error de conexión.';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span class="shimmer"></span>🚀 Publicar Ahora';
+      }
+    }
+
+    async function deleteProj(name) {
+      if (!confirm(`¿Borrar "${name}" para siempre?`)) return;
+      await fetch(`/api/projects/${name}`, { method: 'DELETE' });
+      syncRadar();
+    }
+
+    // Actualiza cada 3 segundos — solo datos reales del servidor
+    setInterval(syncRadar, 3000);
+    syncRadar();
+  </script>
 </body>
 </html>
