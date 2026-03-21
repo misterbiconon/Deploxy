@@ -18,19 +18,13 @@ app.use('/sites', express.static(SITES_DIR));
 app.use(express.static(PUBLIC_DIR));
 app.use(express.json());
 
-// Obtener lista de proyectos subidos
 app.get('/api/projects', (req, res) => {
-    try {
-        const projects = fs.readdirSync(SITES_DIR).filter(file => 
-            fs.statSync(path.join(SITES_DIR, file)).isDirectory()
-        );
-        res.json({ projects });
-    } catch (e) {
-        res.json({ projects: [] });
-    }
+    const projects = fs.readdirSync(SITES_DIR).filter(file => 
+        fs.statSync(path.join(SITES_DIR, file)).isDirectory()
+    );
+    res.json({ projects });
 });
 
-// Borrar un proyecto
 app.delete('/api/projects/:name', (req, res) => {
     const projectPath = path.join(SITES_DIR, req.params.name);
     if (fs.existsSync(projectPath)) {
@@ -40,20 +34,33 @@ app.delete('/api/projects/:name', (req, res) => {
     res.status(404).json({ error: "No encontrado" });
 });
 
-// Subir y descomprimir .ZIP
+// NUEVA LÓGICA: Soporta ZIP y HTML suelto
 app.post('/deploy', upload.single('zipfile'), async (req, res) => {
     const projectName = req.body.name?.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
     if (!req.file || !projectName) return res.status(400).json({error: "Faltan datos"});
 
     const projectDir = path.join(SITES_DIR, projectName);
+    if (!fs.existsSync(projectDir)) fs.mkdirSync(projectDir, {recursive: true});
+
     try {
-        if (!fs.existsSync(projectDir)) fs.mkdirSync(projectDir, {recursive: true});
-        await fs.createReadStream(req.file.path)
-            .pipe(unzipper.Extract({ path: projectDir }))
-            .promise();
-        fs.unlinkSync(req.file.path);
+        if (req.file.originalname.endsWith('.zip')) {
+            // Si es ZIP, lo descomprimimos
+            await fs.createReadStream(req.file.path)
+                .pipe(unzipper.Extract({ path: projectDir }))
+                .promise();
+        } else if (req.file.originalname.endsWith('.html')) {
+            // Si es HTML suelto, lo movemos y lo renombramos a index.html
+            const newPath = path.join(projectDir, 'index.html');
+            fs.renameSync(req.file.path, newPath);
+        } else {
+            return res.status(400).json({error: "Formato no compatible (solo .zip o .html)"});
+        }
+
+        if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
         res.json({ success: true, url: `/sites/${projectName}/index.html` });
-    } catch (e) { res.status(500).json({error: e.message}); }
+    } catch (e) { 
+        res.status(500).json({error: e.message}); 
+    }
 });
 
-app.listen(PORT, () => console.log(`DeployX funcionando en puerto ${PORT}`));
+app.listen(PORT, () => console.log(`DeployX v2.1 (Multi-format) en puerto ${PORT}`));
