@@ -18,7 +18,7 @@ app.use('/sites', express.static(SITES_DIR));
 app.use(express.static(PUBLIC_DIR));
 app.use(express.json());
 
-// API solo para proyectos
+// Obtener lista de proyectos subidos
 app.get('/api/projects', (req, res) => {
     try {
         const projects = fs.readdirSync(SITES_DIR).filter(file => 
@@ -30,7 +30,7 @@ app.get('/api/projects', (req, res) => {
     }
 });
 
-// Borrar proyectos
+// Borrar un proyecto
 app.delete('/api/projects/:name', (req, res) => {
     const projectPath = path.join(SITES_DIR, req.params.name);
     if (fs.existsSync(projectPath)) {
@@ -40,7 +40,7 @@ app.delete('/api/projects/:name', (req, res) => {
     res.status(404).json({ error: "No encontrado" });
 });
 
-// Desplegar .ZIP
+// Subir y descomprimir .ZIP
 app.post('/deploy', upload.single('zipfile'), async (req, res) => {
     const projectName = req.body.name?.replace(/[^a-z0-9-]/gi, '-').toLowerCase();
     if (!req.file || !projectName) return res.status(400).json({error: "Faltan datos"});
@@ -56,4 +56,4 @@ app.post('/deploy', upload.single('zipfile'), async (req, res) => {
     } catch (e) { res.status(500).json({error: e.message}); }
 });
 
-app.listen(PORT, () => console.log(`Panel DeployX listo en puerto ${PORT}`));
+app.listen(PORT, () => console.log(`DeployX funcionando en puerto ${PORT}`));
