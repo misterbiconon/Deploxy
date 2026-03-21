@@ -3,15 +3,25 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>DeployX - Administración</title>
+  <title>DeployX - Admin Panel</title>
+  
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet"/>
+  
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
     :root {
-      --bg: #06080f; --surface: #0d1117; --border: rgba(255,255,255,0.07);
-      --accent: #00e5ff; --accent2: #bf5af2; --text: #e8eaf2; --muted: #5a6177;
-      --success: #00ffa3; --danger: #ff4d6d;
+      --bg: #06080f; 
+      --surface: #0d1117; 
+      --border: rgba(255,255,255,0.07);
+      --accent: #00e5ff; 
+      --accent2: #bf5af2; 
+      --text: #e8eaf2; 
+      --muted: #5a6177;
+      --success: #00ffa3; 
+      --danger: #ff4d6d;
     }
+
     body { 
       font-family: 'DM Sans', sans-serif; 
       background: var(--bg); 
@@ -19,251 +29,213 @@
       padding: 2rem 1rem; 
       line-height: 1.6;
     }
-    .page { max-width: 800px; margin: 0 auto; position: relative; z-index: 1; }
-    
+
+    .page { max-width: 800px; margin: 0 auto; position: relative; }
+
+    /* Fondo decorativo */
+    .orb { 
+      position: fixed; width: 300px; height: 300px; border-radius: 50%; 
+      filter: blur(80px); opacity: 0.05; z-index: -1; 
+    }
+    .orb-1 { background: var(--accent); top: -100px; left: -100px; }
+    .orb-2 { background: var(--accent2); bottom: -100px; right: -100px; }
+
+    /* Cabecera */
     .header { 
       margin-bottom: 2.5rem; 
       border-bottom: 1px solid var(--border); 
       padding-bottom: 1rem; 
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
     }
     .brand h1 { 
       font-family: 'Syne', sans-serif; 
-      font-size: 2rem; 
-      background: linear-gradient(to right, #fff, var(--accent)); 
+      font-size: 2.2rem; 
+      background: linear-gradient(135deg, #fff 0%, var(--accent) 100%); 
       -webkit-background-clip: text; 
       -webkit-text-fill-color: transparent; 
     }
-    
+
+    /* Tarjeta de Estadísticas */
     .stats-card { 
       background: var(--surface); 
       border: 1px solid var(--border); 
-      border-radius: 1rem; 
-      padding: 1.5rem; 
+      border-radius: 1.2rem; 
+      padding: 1.5rem 2rem; 
       margin-bottom: 2rem; 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
     }
-    .stat-val { font-family: 'Syne', sans-serif; font-size: 2.5rem; color: var(--accent); }
-    .stat-lab { color: var(--muted); text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1px; }
+    .stat-val { font-family: 'Syne', sans-serif; font-size: 2.8rem; color: var(--accent); }
+    .stat-lab { color: var(--muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1.5px; }
 
+    /* Caja de Subida */
     .upload-box { 
       background: var(--surface); 
       border: 1px solid var(--border); 
       padding: 2rem; 
       border-radius: 1.5rem; 
-      margin-bottom: 2rem; 
+      margin-bottom: 2.5rem; 
     }
     input[type="text"] { 
-      width: 100%; 
-      padding: 0.8rem; 
-      background: #06080f; 
-      border: 1px solid var(--border); 
-      border-radius: 0.6rem; 
-      color: white; 
-      margin-bottom: 1rem; 
-      outline: none; 
+      width: 100%; padding: 0.9rem; background: #0b0e14; 
+      border: 1px solid var(--border); border-radius: 0.7rem; 
+      color: white; margin-bottom: 1.2rem; outline: none; 
+      transition: border-color 0.3s;
     }
-    .btn-main { 
-      width: 100%; 
-      padding: 1rem; 
-      border: none; 
-      border-radius: 0.8rem; 
-      background: linear-gradient(135deg, var(--accent), var(--accent2)); 
-      color: #000; 
-      font-family: 'Syne', sans-serif; 
-      font-weight: 800; 
-      cursor: pointer; 
-      transition: opacity 0.2s;
-    }
-    .btn-main:hover { opacity: 0.9; }
+    input[type="text"]:focus { border-color: var(--accent); }
     
+    input[type="file"] { margin-bottom: 1.5rem; color: var(--muted); font-size: 0.9rem; }
+
+    .btn-main { 
+      width: 100%; padding: 1.1rem; border: none; border-radius: 0.8rem; 
+      background: linear-gradient(135deg, var(--accent), var(--accent2)); 
+      color: #000; font-family: 'Syne', sans-serif; font-weight: 800; 
+      cursor: pointer; transition: transform 0.2s, opacity 0.2s; 
+    }
+    .btn-main:hover { transform: translateY(-2px); opacity: 0.9; }
+    .btn-main:active { transform: translateY(0); }
+
+    /* Lista de Proyectos */
     .project-card { 
       background: var(--surface); 
       border: 1px solid var(--border); 
-      padding: 1rem; 
-      border-radius: 1rem; 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      margin-bottom: 0.8rem; 
-      transition: transform 0.2s; 
+      padding: 1.2rem; border-radius: 1rem; 
+      display: flex; justify-content: space-between; 
+      align-items: center; margin-bottom: 1rem; 
     }
-    .project-card:hover { transform: translateX(5px); border-color: var(--accent); }
-    .btn-view { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.8rem; }
-    .btn-del { color: var(--danger); background: none; border: none; cursor: pointer; font-size: 0.8rem; margin-left: 15px; font-weight: 600; }
+    .proj-name { font-weight: 500; display: flex; align-items: center; gap: 10px; }
+    .actions { display: flex; gap: 12px; align-items: center; }
+    .btn-view { color: var(--accent); text-decoration: none; font-weight: 600; font-size: 0.85rem; }
+    .btn-del { color: var(--danger); background: none; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
     
-    #uploadStatus { 
-        margin-top: 1rem; 
-        text-align: center; 
-        font-size: 0.9rem; 
-        display: none; 
-    }
+    #statusMsg { margin-top: 1rem; text-align: center; font-size: 0.9rem; font-weight: 500; display: none; }
   </style>
 </head>
 <body>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+
   <div class="page">
-    <div class="header">
-      <div class="brand"><h1>DeployX</h1></div>
-      <div style="font-size: 0.7rem; color: var(--muted);">v2.0 · Morelos</div>
-    </div>
+    <header class="header">
+      <div class="brand">
+        <h1>DeployX</h1>
+      </div>
+      <div style="font-size: 0.7rem; color: var(--muted); text-align: right;">
+        PANEL DE CONTROL<br><b>MORELOS v2.0</b>
+      </div>
+    </header>
 
     <div class="stats-card">
       <div>
-        <div class="stat-lab">Proyectos Totales</div>
+        <div class="stat-lab">Proyectos Activos</div>
         <div class="stat-val" id="totalCount">0</div>
       </div>
       <div style="text-align: right;">
-        <div class="stat-lab">Estado</div>
-        <div style="color: var(--success); font-weight: bold;">SISTEMA ONLINE</div>
+        <div class="stat-lab">Servidor</div>
+        <div style="color: var(--success); font-weight: 800; font-size: 0.9rem;">● ONLINE</div>
       </div>
     </div>
 
     <div class="upload-box">
-      <input type="text" id="pName" placeholder="Nombre del proyecto (ej: mi-web)">
-      <input type="file" id="pZip" accept=".zip" style="margin-bottom: 1rem; display: block; width: 100%; color: var(--muted);">
-      <button class="btn-main" onclick="subir()">🚀 DESPLEGAR AHORA</button>
-      <div id="uploadStatus"></div>
+      <h3 style="margin-bottom: 1rem; font-family: 'Syne'; font-size: 1rem;">🚀 Desplegar nuevo sitio</h3>
+      <input type="text" id="pName" placeholder="Nombre del proyecto (ej: mi-web-pro)"/>
+      <input type="file" id="pZip" accept=".zip"/>
+      <button class="btn-main" onclick="subir()">PUBLICAR AHORA</button>
+      <div id="statusMsg"></div>
     </div>
 
-    <h2 style="font-family: 'Syne'; margin-bottom: 1rem; font-size: 1.2rem;">Mis Sitios Web</h2>
+    <h2 style="font-family: 'Syne'; margin-bottom: 1.2rem; font-size: 1.3rem;">Mis Sitios Web</h2>
     <div id="projectList">
-        <p style="color: var(--muted); text-align: center;">Cargando proyectos...</p>
+      <p style="color: var(--muted); text-align: center;">Cargando archivos del servidor...</p>
     </div>
-    
-    <p style="text-align:center; color:#1e2535; font-size:0.7rem; margin-top:3rem;">MORELOS CLOUD · 2026</p>
+
+    <footer style="text-align: center; margin-top: 4rem; padding-bottom: 2rem;">
+      <p style="color: #1e2535; font-size: 0.75rem; letter-spacing: 1px;">&copy; 2026 MORELOS CLOUD SOLUTIONS</p>
+    </footer>
   </div>
 
   <script>
-    // Cargar la lista de proyectos al iniciar
-    async function cargar() {
+    const listContainer = document.getElementById('projectList');
+    const totalCountEl = document.getElementById('totalCount');
+    const statusMsg = document.getElementById('statusMsg');
+
+    // Función para sincronizar la lista
+    async function cargarProyectos() {
       try {
         const res = await fetch('/api/projects');
         const data = await res.json();
-        document.getElementById('totalCount').innerText = data.projects.length;
         
-        const list = document.getElementById('projectList');
+        totalCountEl.innerText = data.projects.length;
+
         if (data.projects.length === 0) {
-            list.innerHTML = '<p style="color: var(--muted); text-align: center;">No hay proyectos todavía.</p>';
-            return;
-        }
-
-        list.innerHTML = data.projects.map(p => `
-          <div class="project-card">
-            <span>🌐 ${p}</span>
-            <div>
-              <a class="btn-view" href="/sites/${p}/index.html" target="_blank">VER</a>
-              <button class="btn-del" onclick="borrar('${p}')">BORRAR</button>
-            </div>
-          </div>`).join('');
-      } catch (e) {
-        console.error("Error al cargar proyectos");
-      }
-    }
-
-    async function subir() {
-      const nameInput = document.getElementById('pName');
-      const fileInput = document.getElementById('pZip');
-      const statusEl = document.getElementById('uploadStatus');
-      
-      const name = nameInput.value.trim();
-      const file = fileInput.files[0];
-
-      if(!name || !file) {
-          alert("Por favor, pon un nombre y selecciona un archivo .zip");
+          listContainer.innerHTML = '<p style="color: var(--muted); text-align: center;">No hay proyectos subidos todavía.</p>';
           return;
-      }
-
-      statusEl.style.display = 'block';
-      statusEl.innerText = "⏳ Subiendo archivo...";
-      statusEl.style.color = "var(--accent)";
-
-      const fd = new FormData();
-      fd.append('name', name);
-      fd.append('zipfile', file);
-
-      try {
-        const res = await fetch('/deploy', { method: 'POST', body: fd });
-        if(res.ok) {
-          statusEl.innerText = "✅ ¡Proyecto publicado con éxito!";
-          statusEl.style.color = "var(--success)";
-          nameInput.value = "";
-          fileInput.value = "";
-          cargar();
-        } else {
-          statusEl.innerText = "❌ Error al subir el proyecto.";
-          statusEl.style.color = "var(--danger)";
         }
-      } catch (e) { 
-          statusEl.innerText = "❌ Error de conexión con el servidor.";
-          statusEl.style.color = "var(--danger)";
-      }
-    }
 
-    async function borrar(n) {
-      if(confirm(`¿Estás seguro de que quieres eliminar "${n}"?`)) {
-        try {
-            await fetch(`/api/projects/${n}`, { method: 'DELETE' });
-            cargar();
-        } catch (e) {
-            alert("No se pudo borrar el proyecto.");
-        }
-      }
-    }
-
-    // Ejecutar carga inicial
-    cargar();
-  </script>
-</body>
-</html>
-            <div>
-              <a class="btn-view" href="/sites/${p}/index.html" target="_blank">VER</a>
-              <button class="btn-del" onclick="deleteProj('${p}')">BORRAR</button>
+        listContainer.innerHTML = data.projects.map(p => `
+          <div class="project-card">
+            <div class="proj-name">🌐 ${p}</div>
+            <div class="actions">
+              <a class="btn-view" href="/sites/${p}/index.html" target="_blank">VER WEB</a>
+              <button class="btn-del" onclick="borrarProyecto('${p}')">BORRAR</button>
             </div>
-          </div>`).join('');
-      }<script catch (err) { console.error("Error de conexión real"); }
-    }
-<script>
-  body    {
-    async function upload() {
-      const name = document.getElementById('projName').value.trim();
-      const file = zipInput.files[0];
-      const statusEl = document.getElementById('uploadStatus');
-      if (!name || !file) return alert("Faltan datos");
+          </div>
+        `).join('');
 
-      statusEl.style.display = 'block';
-      statusEl.innerText = "⏳ Subiendo...";
-      statusEl.style.color = "var(--accent)";
-
-      const fd = new FormData();
-      fd.append('name', name);
-      fd.append('zipfile', file);
-
-      try {
-        const res = await fetch('/deploy', { method: 'POST', body: fd });
-        if (res.ok) {
-          statusEl.innerText = "✨ ¡Publicado con éxito!";
-          statusEl.style.color = "var(--success)";
-          syncRadar();
-        } else {
-          statusEl.innerText = "❌ Error al subir";
-          statusEl.style.color = "var(--danger)";
-        }
-      } catch (e) { alert("Error de conexión"); }
-    }
-
-    async function deleteProj(name) {
-      if (confirm(`¿Borrar "${name}"?`)) {
-        await fetch(`/api/projects/${name}`, { method: 'BORRAR' });
-        syncRadar();
+      } catch (err) {
+        listContainer.innerHTML = '<p style="color: var(--danger); text-align: center;">Error al conectar con el servidor.</p>';
       }
     }
 
-    setInterval(syncRadar, 3000);
-    syncRadar();
+    // Función para subir archivos
+    async function subir() {
+      const name = document.getElementById('pName').value.trim();
+      const file = document.getElementById('pZip').files[0];
+
+      if (!name || !file) {
+        alert("Por favor rellena el nombre y selecciona un archivo .zip");
+        return;
+      }
+
+      statusMsg.style.display = 'block';
+      statusMsg.innerText = "⏳ Procesando despliegue...";
+      statusMsg.style.color = "var(--accent)";
+
+      const formData = new FormData();
+      formData.append('name', name);
+      formData.append('zipfile', file);
+
+      try {
+        const response = await fetch('/deploy', { method: 'POST', body: formData });
+        if (response.ok) {
+          statusMsg.innerText = "✨ ¡Sitio web publicado con éxito!";
+          statusMsg.style.color = "var(--success)";
+          document.getElementById('pName').value = "";
+          document.getElementById('pZip').value = "";
+          cargarProyectos();
+        } else {
+          statusMsg.innerText = "❌ Error en el servidor al procesar el ZIP.";
+          statusMsg.style.color = "var(--danger)";
+        }
+      } catch (e) {
+        statusMsg.innerText = "❌ Error de conexión.";
+        statusMsg.style.color = "var(--danger)";
+      }
+    }
+
+    // Función para eliminar
+    async function borrarProyecto(nombre) {
+      if (confirm(`¿Estás seguro de que quieres eliminar "${nombre}" permanentemente?`)) {
+        await fetch(`/api/projects/${nombre}`, { method: 'DELETE' });
+        cargarProyectos();
+      }
+    }
+
+    // Inicio automático
+    cargarProyectos();
   </script>
 </body>
 </html>
