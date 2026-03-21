@@ -1,7 +1,6 @@
 {
-  "name": "deployx-morelos",
+  "name": "deployx",
   "version": "2.1.0",
-  "description": "Panel de control para despliegue de sitios HTML y ZIP",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
